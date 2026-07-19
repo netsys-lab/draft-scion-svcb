@@ -1,17 +1,22 @@
 ---
 title: "The scion SVCB Service Parameter and SCION-Aware Happy Eyeballs"
 abbrev: "SCION SVCB"
-category: 
-docname: 
-submissiontype: 
-ipr: 
-area: "Internet"
-workgroup: 
+category: info
+docname: draft-scion-svcb-latest
+submissiontype: Independent
+number:
+date:
+consensus: true
+v: 3
+# area:
+# workgroup: 
 keyword:
   - SVCB
   - SCION
   - Happy Eyeballs
   - path-aware networking
+venue:
+  github: "netsys-lab/draft-scion-svcb"
 author:
   - fullname: Jelte van Bommel
     initials: J.
