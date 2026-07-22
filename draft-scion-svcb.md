@@ -163,13 +163,31 @@ renders the RR malformed and it MUST be entirely ignored.
 The presentation value is a comma-separated list ({{RFC9460}},
 Appendix A.1) of SCION addresses in their canonical text form. Because
 the SCION address text form itself contains a comma separating the
-ISD-ASN from the host address, that inner comma MUST be escaped, in
-the same manner that "alpn" values escape embedded commas:
+ISD-ASN from the host address, that inner comma MUST be escaped as
+"\\," at the value-list layer, in the same manner that "alpn" values
+escape embedded commas.
+
+Note that {{RFC9460}} decodes presentation values in two stages:
+character-string decoding (Appendix A of that document) first, then
+value-list decoding (Appendix A.1). The "\\," escape must survive the
+first stage in order to be visible to the second. In a zone file the
+inner comma of each SCION address is therefore written "\\\\," -- an
+escaped backslash followed by a comma. A zone file containing a
+single "\\," instead character-string-decodes to a bare comma, which
+the value-list stage then interprets as an item separator, splitting
+the SCION address into fragments that do not parse as SCION addresses
+at all; such a record is malformed and MUST be entirely ignored.
+{{presentation-vectors}} exercises both cases.
 
 ~~~
 example.com. 300 IN SVCB 1 . alpn=h3 port=443 (
-                           scion=71-2:0:4a\,10.44.25.3 )
+                           scion=71-2:0:4a\\,10.44.25.3 )
 ~~~
+
+Implementations that do not implement the value-list escaping
+procedure of Appendix A.1 of {{RFC9460}} can rely on the unknown-key
+presentation format instead (e.g. "key65280=..." carrying the decoded
+wire format directly), as provided by Section 2.1 of {{RFC9460}}.
 
 Zone-file implementations MUST accept both the decimal and hexadecimal
 ASN text forms and MUST emit the form that was parsed, without
@@ -219,8 +237,11 @@ example.com. 300 IN TXT "scion=71-2:0:4a,10.44.25.3"
 
 This convention is consumed by IP-to-SCION translation gateways and
 their DNS components, which synthesize AAAA answers inside a
-SCION-mapped IPv6 prefix from it. This document does not deprecate the
-TXT convention. During transition, zones SHOULD publish both the
+SCION-mapped IPv6 prefix from it. Note that the TXT RDATA is an
+ordinary character-string with no value-list decoding stage, so the
+comma inside the SCION address requires no escaping there, unlike in
+the "scion" SvcParam ({{presentation-format}}). This document does
+not deprecate the TXT convention. During transition, zones SHOULD publish both the
 "scion" SvcParam and the TXT record for a name, and when both are
 published for the same name they SHOULD list the same set of SCION
 addresses. They MAY differ where the two records deliberately serve
@@ -282,7 +303,7 @@ or "G" suffix (bits per second). No item contains a comma, so unlike
 
 ~~~
 gameserver.example. 300 IN SVCB 1 . alpn=h3 (
-    scion=71-2:0:4a\,10.44.25.3 scion-policy=latency,maxlat=50ms )
+    scion=71-2:0:4a\\,10.44.25.3 scion-policy=latency,maxlat=50ms )
 ~~~
 
 Implementations converting presentation to wire form emit items in
@@ -472,10 +493,10 @@ $ORIGIN scion.
 
 web       IN AAAA 2001:db8:660::215
 web       IN A    198.51.100.215
-web       IN HTTPS 1 . alpn=h3,h2 port=443 scion=1-150\,10.150.0.81 scion-policy=bw,latency
+web       IN HTTPS 1 . alpn=h3,h2 port=443 scion=1-150\\,10.150.0.81 scion-policy=bw,latency
 web       IN TXT  "scion=1-150,10.20.3.215"
 
-games     IN HTTPS 1 . alpn=h3 scion=71-2:0:4a\,10.44.25.3 scion-policy=latency
+games     IN HTTPS 1 . alpn=h3 scion=71-2:0:4a\\,10.44.25.3 scion-policy=latency
 games     IN TXT  "scion=71-2:0:4a,10.44.25.3"
 ~~~
 
@@ -491,7 +512,7 @@ Each vector gives the presentation form of one SCION address and the
 exact 24-octet wire encoding of a "scion" SvcParamValue carrying it,
 shown as ISD (2 octets) | ASN (6 octets) | host (16 octets); the
 whitespace is illustrative only. The reference implementation executes
-these vectors as its test suite.
+the wire-format vectors as its test suite.
 
 ~~~
 Presentation: 1-150,10.20.3.215
@@ -505,16 +526,44 @@ Wire:         0047 00020000004a 00000000000000000000ffff0a2c1903
 ~~~
 
 A value carrying both of the first two addresses is the 48-octet
-concatenation of their encodings, with the presentation form:
+concatenation of their encodings, with the zone-file presentation
+form:
 
 ~~~
-scion=1-150\,10.20.3.215,1-ff00:0:110\,2001:db8::1
+scion=1-150\\,10.20.3.215,1-ff00:0:110\\,2001:db8::1
 ~~~
 
 Rendering wire values follows the canonical-ASN rule of
 {{presentation-format}}: at the threshold, the ASN ffffffff
 (2^32 - 1) renders as "4294967295" while 000100000000 (2^32) renders
 as "1:0:0".
+
+## Presentation Decoding Vectors {#presentation-vectors}
+
+Each vector gives a "scion" SvcParamValue as it appears in a zone
+file, the octets after character-string decoding (Appendix A of
+{{RFC9460}}), and the item list after value-list decoding
+(Appendix A.1 of {{RFC9460}}). Quoted char-strings containing the
+same octets are equivalent.
+
+~~~
+Zone file:    scion=1-150\\,10.20.3.215
+Char-string:  1-150\,10.20.3.215
+List:         [ 1-150,10.20.3.215 ]
+
+Zone file:    scion=1-150\\,10.20.3.215,1-ff00:0:110\\,2001:db8::1
+Char-string:  1-150\,10.20.3.215,1-ff00:0:110\,2001:db8::1
+List:         [ 1-150,10.20.3.215 ], [ 1-ff00:0:110,2001:db8::1 ]
+
+Zone file:    scion=1-150\,10.20.3.215
+Char-string:  1-150,10.20.3.215
+List:         [ 1-150 ], [ 10.20.3.215 ]
+~~~
+
+In the last vector the single "\\," does not survive character-string
+decoding, so the comma splits the value into two items, neither of
+which is a SCION address; the record is malformed and MUST be
+entirely ignored ({{presentation-format}}).
 
 Vectors for the "scion-policy" SvcParamValue (concatenated
 type|length|value items; whitespace illustrative):
@@ -527,5 +576,5 @@ Presentation: scion-policy=latency,maxlat=50ms,minbw=25M
 Wire:         0000 4004 0000c350 4104 000061a8
 ~~~
 
-# Acknowledgments
 
+# Acknowledgments
