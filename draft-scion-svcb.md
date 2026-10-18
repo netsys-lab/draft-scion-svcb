@@ -67,7 +67,7 @@ Hosts deploying SCION are, in practice, dual-connected: they retain
 ordinary IPv4/IPv6 connectivity while additionally being reachable over
 SCION.
 
-Today there is no standardized way for such a host to advertise its
+Today there is no interoperable way for such a host to advertise its
 SCION reachability in the DNS. Deployed practice uses a freeform TXT
 record convention of the form "scion=ISD-AS,host" (see
 {{txt-coexistence}}), which cannot participate in service binding:
@@ -113,7 +113,7 @@ ISD:
 : Isolation Domain, the top-level grouping of SCION autonomous systems,
   identified by a 16-bit number.
 
-ASN:
+SCION AS:
 : A SCION AS number, a 48-bit number. Its canonical text form is either
   a decimal number (for values in the BGP-compatible range) or three
   colon-separated groups of up to four hexadecimal digits (e.g.
@@ -147,7 +147,7 @@ The SvcParamValue is a non-empty sequence of one or more fixed-length
 | Field              | Length                 |
 +--------------------+------------------------+
 | ISD                | 2 octets, network order|
-| ASN                | 6 octets, network order|
+| SCION AS           | 6 octets, network order|
 | Host address       | 16 octets              |
 +--------------------+------------------------+
 ~~~
@@ -156,12 +156,14 @@ The host address field always contains an IPv6 address. An IPv4 host
 address is carried as an IPv4-mapped IPv6 address (::ffff:a.b.c.d).
 
 A SvcParamValue whose length is zero or is not a multiple of 24 octets
-renders the RR malformed and it MUST be entirely ignored.
+renders the RR malformed and implementation MUST ignore it.
 
 ## Presentation Format {#presentation-format}
 
 The presentation value is a comma-separated list ({{RFC9460}},
-Appendix A.1) of SCION addresses in their canonical text form. Because
+Appendix A.1) of SCION addresses in their canonical text representation
+defined by {{I-D.draft-dekater-scion-controlplane}} section 1.5.3.
+Because
 the SCION address text form itself contains a comma separating the
 ISD-ASN from the host address, that inner comma MUST be escaped as
 "\\," at the value-list layer, in the same manner that "alpn" values
