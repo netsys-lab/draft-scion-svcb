@@ -1,6 +1,6 @@
 {
   "magic": "E!vIA5L86J2I",
-  "timestamp": "2026-10-18T01:56:09.667748+00:00",
+  "timestamp": "2026-10-20T02:28:01.014824+00:00",
   "repo": "netsys-lab/draft-scion-svcb",
   "labels": [
     {
@@ -50,5 +50,93 @@
     }
   ],
   "issues": [],
-  "pulls": []
+  "pulls": [
+    {
+      "number": 1,
+      "id": "PR_kwDOTdBIJc8AAAABJLomeg",
+      "title": "Update terminology and clarify SCION address formatNic quick review",
+      "url": "https://github.com/netsys-lab/draft-scion-svcb/pull/1",
+      "state": "OPEN",
+      "author": "nicorusti",
+      "authorAssociation": "NONE",
+      "assignees": [],
+      "labels": [],
+      "body": "Did a quick review. \n\nAdding more points in comments",
+      "createdAt": "2026-10-18T17:18:32Z",
+      "updatedAt": "2026-10-18T17:21:45Z",
+      "baseRepository": "netsys-lab/draft-scion-svcb",
+      "baseRefName": "main",
+      "baseRefOid": "47a256813b85f8a366fd06eafee30fddc4938eea",
+      "headRepository": "nicorusti/draft-scion-svcb",
+      "headRefName": "main",
+      "headRefOid": "d490206453008155e26da5fe758bd38374776fd6",
+      "closedAt": null,
+      "mergedAt": null,
+      "mergedBy": null,
+      "mergeCommit": null,
+      "comments": [],
+      "reviews": [
+        {
+          "id": "PRR_kwDOTdBIJc8AAAABS6RhnA",
+          "commit": {
+            "abbreviatedOid": "d490206"
+          },
+          "author": "nicorusti",
+          "authorAssociation": "NONE",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2026-10-18T17:19:25Z",
+          "updatedAt": "2026-10-18T17:19:25Z",
+          "comments": [
+            {
+              "originalPosition": 13,
+              "body": "Feedback we often get was to clearly separate wording for SCION ASes and normal BGP ASes. \nYou can also reuse the terminology in the main SCION drafts and refer to it.",
+              "createdAt": "2026-10-18T17:19:25Z",
+              "updatedAt": "2026-10-18T17:19:25Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOTdBIJc8AAAABS6R3Zw",
+          "commit": {
+            "abbreviatedOid": "d490206"
+          },
+          "author": "nicorusti",
+          "authorAssociation": "NONE",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2026-10-18T17:21:09Z",
+          "updatedAt": "2026-10-18T17:21:09Z",
+          "comments": [
+            {
+              "originalPosition": 1,
+              "body": "I would not say you extend another IETF standards track document.. This doe not work unless oyu are adopted by a WG.. \nYou could say \"proposes\". \n\nHowever, I feel this document is defining two different things (happy eyeballs, and SVCB records, which I feel belong to two different drafts",
+              "createdAt": "2026-10-18T17:21:09Z",
+              "updatedAt": "2026-10-18T17:21:09Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOTdBIJc8AAAABS6R-ow",
+          "commit": {
+            "abbreviatedOid": "d490206"
+          },
+          "author": "nicorusti",
+          "authorAssociation": "NONE",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2026-10-18T17:21:45Z",
+          "updatedAt": "2026-10-18T17:21:45Z",
+          "comments": [
+            {
+              "originalPosition": 1,
+              "body": "Here you would have to mention what registries  you want :)",
+              "createdAt": "2026-10-18T17:21:45Z",
+              "updatedAt": "2026-10-18T17:21:45Z"
+            }
+          ]
+        }
+      ]
+    }
+  ]
 }
