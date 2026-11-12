@@ -1,0 +1,3 @@
+# Automatically generated CODEOWNERS
+# Regenerate with `make update-codeowners`
+draft-john-scion-svcb.md tony.john@ovgu.de jelte.vanbommel@inf.ethz.ch tilmann.zaeschke@inf.ethz.ch lschulz@ovgu.de nic@scion.org
