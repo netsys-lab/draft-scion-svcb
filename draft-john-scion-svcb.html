@@ -1,0 +1,2040 @@
+<!DOCTYPE html>
+<html lang="en" class="Internet-Draft">
+<head>
+<meta charset="utf-8">
+<meta content="Common,Latin" name="scripts">
+<meta content="initial-scale=1.0" name="viewport">
+<title>Publishing SCION Endpoint Addresses in DNS Service Binding (SVCB) Records</title>
+<meta content="Tony John" name="author">
+<meta content="Jelte van Bommel" name="author">
+<meta content="Tilmann Zäschke" name="author">
+<meta content="Lars-Christian Schulz" name="author">
+<meta content="Nicola Rustignoli" name="author">
+<meta content='
+       This document defines "scion", a Service Parameter Key (SvcParamKey) for
+the Service Binding (SVCB) and HTTPS DNS resource records. Its value
+lists the addresses at which a service endpoint is reachable over SCION
+(Scalability, Control, and Isolation On Next-generation networks), a
+path-aware inter-domain network architecture. This document specifies
+the wire format, presentation format, and semantics of the key and
+requests its registration with IANA. 
+    ' name="description">
+<meta content="xml2rfc 3.35.0" name="generator">
+<meta content="SVCB" name="keyword">
+<meta content="HTTPS RR" name="keyword">
+<meta content="SCION" name="keyword">
+<meta content="path-aware networking" name="keyword">
+<meta content="draft-john-scion-svcb-latest" name="ietf.draft">
+<!-- Generator version information:
+  xml2rfc 3.35.0
+    Python 3.14.10
+    ConfigArgParse 1.9.0
+    google-i18n-address 3.1.1
+    intervaltree 3.2.1
+    Jinja2 3.1.6
+    lxml 6.1.1
+    natsort 8.4.0
+    platformdirs 4.14.3
+    pycountry 24.6.1
+    PyYAML 6.0.3
+    requests 2.33.1
+    wcwidth 0.9.4
+-->
+<link href="draft-john-scion-svcb.xml" rel="alternate" type="application/rfc+xml">
+<link href="#copyright" rel="license">
+<style type="text/css">@font-face {
+  font-family: 'Lora';
+  font-style: italic;
+  font-weight: 400;
+  font-display: swap;
+  src: local('Lora Italic'), local('Lora-Italic'), url('https://martinthomson.github.io/rfc-css/fonts/lora-italic-cyrillic-ext.woff2') format('woff2');
+  unicode-range: U+0460-052F, U+1C80-1C88, U+20B4, U+2DE0-2DFF, U+A640-A69F, U+FE2E-FE2F;
+}
+@font-face {
+  font-family: 'Lora';
+  font-style: italic;
+  font-weight: 400;
+  font-display: swap;
+  src: local('Lora Italic'), local('Lora-Italic'), url('https://martinthomson.github.io/rfc-css/fonts/lora-italic-cyrillic-ext.woff2') format('woff2');
+  unicode-range: U+0400-045F, U+0490-0491, U+04B0-04B1, U+2116;
+}
+@font-face {
+  font-family: 'Lora';
+  font-style: italic;
+  font-weight: 400;
+  font-display: swap;
+  src: local('Lora Italic'), local('Lora-Italic'), url('https://martinthomson.github.io/rfc-css/fonts/lora-italic-vietnamese.woff2') format('woff2');
+  unicode-range: U+0102-0103, U+0110-0111, U+1EA0-1EF9, U+20AB;
+}
+@font-face {
+  font-family: 'Lora';
+  font-style: italic;
+  font-weight: 400;
+  font-display: swap;
+  src: local('Lora Italic'), local('Lora-Italic'), url('https://martinthomson.github.io/rfc-css/fonts/lora-italic-latin-ext.woff2') format('woff2');
+  unicode-range: U+0100-024F, U+0259, U+1E00-1EFF, U+2020, U+20A0-20AB, U+20AD-20CF, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+@font-face {
+  font-family: 'Lora';
+  font-style: italic;
+  font-weight: 400;
+  font-display: swap;
+  src: local('Lora Italic'), local('Lora-Italic'), url('https://martinthomson.github.io/rfc-css/fonts/lora-italic-latin.woff2') format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+2000-206F, U+2074, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+@font-face {
+  font-family: 'Lora';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: local('Lora Regular'), local('Lora-Regular'), url('https://martinthomson.github.io/rfc-css/fonts/lora-regular-cyrillic-ext.woff2') format('woff2');
+  unicode-range: U+0460-052F, U+1C80-1C88, U+20B4, U+2DE0-2DFF, U+A640-A69F, U+FE2E-FE2F;
+}
+@font-face {
+  font-family: 'Lora';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: local('Lora Regular'), local('Lora-Regular'), url('https://martinthomson.github.io/rfc-css/fonts/lora-regular-cyrillic.woff2') format('woff2');
+  unicode-range: U+0400-045F, U+0490-0491, U+04B0-04B1, U+2116;
+}
+@font-face {
+  font-family: 'Lora';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: local('Lora Regular'), local('Lora-Regular'), url('https://martinthomson.github.io/rfc-css/fonts/lora-regular-vietnamese.woff2') format('woff2');
+  unicode-range: U+0102-0103, U+0110-0111, U+1EA0-1EF9, U+20AB;
+}
+@font-face {
+  font-family: 'Lora';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: local('Lora Regular'), local('Lora-Regular'), url('https://martinthomson.github.io/rfc-css/fonts/lora-regular-latin-ext.woff2') format('woff2');
+  unicode-range: U+0100-024F, U+0259, U+1E00-1EFF, U+2020, U+20A0-20AB, U+20AD-20CF, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+@font-face {
+  font-family: 'Lora';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: local('Lora Regular'), local('Lora-Regular'), url('https://martinthomson.github.io/rfc-css/fonts/lora-regular-latin.woff2') format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+2000-206F, U+2074, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+@font-face {
+  font-family: 'Lora';
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: local('Lora Bold'), local('Lora-Bold'), url('https://martinthomson.github.io/rfc-css/fonts/lora-bold-cyrillic-ext.woff2') format('woff2');
+  unicode-range: U+0460-052F, U+1C80-1C88, U+20B4, U+2DE0-2DFF, U+A640-A69F, U+FE2E-FE2F;
+}
+@font-face {
+  font-family: 'Lora';
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: local('Lora Bold'), local('Lora-Bold'), url('https://martinthomson.github.io/rfc-css/fonts/lora-bold-cyrillic.woff2') format('woff2');
+  unicode-range: U+0400-045F, U+0490-0491, U+04B0-04B1, U+2116;
+}
+@font-face {
+  font-family: 'Lora';
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: local('Lora Bold'), local('Lora-Bold'), url('https://martinthomson.github.io/rfc-css/fonts/lora-bold-vietnamese.woff2') format('woff2');
+  unicode-range: U+0102-0103, U+0110-0111, U+1EA0-1EF9, U+20AB;
+}
+@font-face {
+  font-family: 'Lora';
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: local('Lora Bold'), local('Lora-Bold'), url('https://martinthomson.github.io/rfc-css/fonts/lora-bold-latin-ext.woff2') format('woff2');
+  unicode-range: U+0100-024F, U+0259, U+1E00-1EFF, U+2020, U+20A0-20AB, U+20AD-20CF, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+@font-face {
+  font-family: 'Lora';
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: local('Lora Bold'), local('Lora-Bold'), url('https://martinthomson.github.io/rfc-css/fonts/lora-bold-latin.woff2') format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+2000-206F, U+2074, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+@font-face {
+  font-family: 'Lora';
+  font-style: normal;
+  font-weight: 600;
+  font-display: swap;
+  src: local('Lora SemiBold'), local('Lora-SemiBold'), url('https://martinthomson.github.io/rfc-css/fonts/lora-semibold-latin.woff2') format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+2000-206F, U+2074, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+
+@font-face {
+  font-family: 'Oxygen Mono';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: local('Oxygen Mono'), local('OxygenMono-Regular'), url('https://martinthomson.github.io/rfc-css/fonts/oxygenmono-regular-latin-ext.woff2') format('woff2');
+  unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+@font-face {
+  font-family: 'Oxygen Mono';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: local('Oxygen Mono'), local('OxygenMono-Regular'), url('https://martinthomson.github.io/rfc-css/fonts/oxygenmono-regular-latin.woff2') format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+
+@font-face {
+  font-family: 'Sofia Sans Semi Condensed';
+  font-style: italic;
+  font-weight: 1 1000;
+  src: url('https://martinthomson.github.io/rfc-css/fonts/sofiasanssemicondensed-italic-cyrillic-ext.woff2') format('woff2');
+  unicode-range: U+0460-052F, U+1C80-1C8A, U+20B4, U+2DE0-2DFF, U+A640-A69F, U+FE2E-FE2F;
+}
+@font-face {
+  font-family: 'Sofia Sans Semi Condensed';
+  font-style: italic;
+  font-weight: 1 1000;
+  src: url('https://martinthomson.github.io/rfc-css/fonts/sofiasanssemicondensed-italic-cyrillic.woff2') format('woff2');
+  unicode-range: U+0301, U+0400-045F, U+0490-0491, U+04B0-04B1, U+2116;
+}
+@font-face {
+  font-family: 'Sofia Sans Semi Condensed';
+  font-style: italic;
+  font-weight: 1 1000;
+  src: url('https://martinthomson.github.io/rfc-css/fonts/sofiasanssemicondensed-italic-greek.woff2') format('woff2');
+  unicode-range: U+0370-0377, U+037A-037F, U+0384-038A, U+038C, U+038E-03A1, U+03A3-03FF;
+}
+@font-face {
+  font-family: 'Sofia Sans Semi Condensed';
+  font-style: italic;
+  font-weight: 1 1000;
+  src: url('https://martinthomson.github.io/rfc-css/fonts/sofiasanssemicondensed-italic-latin-ext.woff2') format('woff2');
+  unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+@font-face {
+  font-family: 'Sofia Sans Semi Condensed';
+  font-style: italic;
+  font-weight: 1 1000;
+  src: url('https://martinthomson.github.io/rfc-css/fonts/sofiasanssemicondensed-italic-latin.woff2') format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+@font-face {
+  font-family: 'Sofia Sans Semi Condensed';
+  font-style: normal;
+  font-weight: 1 1000;
+  src: url('https://martinthomson.github.io/rfc-css/fonts/sofiasanssemicondensed-regular-cyrillic-ext.woff2') format('woff2');
+  unicode-range: U+0460-052F, U+1C80-1C8A, U+20B4, U+2DE0-2DFF, U+A640-A69F, U+FE2E-FE2F;
+}
+@font-face {
+  font-family: 'Sofia Sans Semi Condensed';
+  font-style: normal;
+  font-weight: 1 1000;
+  src: url('https://martinthomson.github.io/rfc-css/fonts/sofiasanssemicondensed-regular-cyrillic.woff2') format('woff2');
+  unicode-range: U+0301, U+0400-045F, U+0490-0491, U+04B0-04B1, U+2116;
+}
+@font-face {
+  font-family: 'Sofia Sans Semi Condensed';
+  font-style: normal;
+  font-weight: 1 1000;
+  src: url('https://martinthomson.github.io/rfc-css/fonts/sofiasanssemicondensed-regular-greek.woff2') format('woff2');
+  unicode-range: U+0370-0377, U+037A-037F, U+0384-038A, U+038C, U+038E-03A1, U+03A3-03FF;
+}
+@font-face {
+  font-family: 'Sofia Sans Semi Condensed';
+  font-style: normal;
+  font-weight: 1 1000;
+  src: url('https://martinthomson.github.io/rfc-css/fonts/sofiasanssemicondensed-regular-latin-ext.woff2') format('woff2');
+  unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+@font-face {
+  font-family: 'Sofia Sans Semi Condensed';
+  font-style: normal;
+  font-weight: 1 1000;
+  src: url('https://martinthomson.github.io/rfc-css/fonts/sofiasanssemicondensed-regular-latin.woff2') format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+
+:root {
+  color-scheme: light dark;
+  --background-color: #fff;
+  --text-color: #222;
+  --title-color: #191919;
+  --link-color: #2a6496;
+  --highlight-color: #f9f9f9;
+  --line-color: #eee;
+  --pilcrow-weak: #ddd;
+  --pilcrow-strong: #bbb;
+  --small-font-size: 14.5px;
+  --font-mono: 'Oxygen Mono', monospace;
+  --font-title: "Sofia Sans Semi Condensed", sans-serif;
+  scrollbar-color: #bbb #eee;
+}
+body {
+  max-width: 600px;
+  margin: 75px auto;
+  padding: 0 5px;
+  color: var(--text-color);
+  background-color: var(--background-color);
+  font: 16px/22px "Lora", serif;
+  scroll-behavior: smooth;
+}
+
+.ears {
+  display: none;
+}
+
+/* headings */
+section {
+  clear: both;
+}
+.section-number {
+  padding-right: 0.5em;
+}
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--font-title);
+  font-weight: 680;
+  margin: 0.8em 0 0.3em;
+  font-size-adjust: 0.5;
+  color: var(--title-color);
+}
+h1 {
+  &#title {
+    font-size: 32px;
+    line-height: 40px;
+    clear: both;
+    margin: 1.5em 0 0.2em;
+  }
+  &#rfcnum {
+    margin: 1.5em 0 0.2em;
+    & + h1#title {
+      margin: 0.2em 0;
+    }
+  }
+}
+
+h1, h2, h3 {
+  font-size: 22px;
+  line-height: 27px;
+}
+h4, h5, h6 {
+  font-size: 20px;
+  line-height: 24px;
+}
+
+/* general structure */
+.author {
+  padding-bottom: 0.3em;
+  vertical-align: top;
+}
+#abstract+p {
+  font-size: 18px;
+  line-height: 24px;
+  & code, & samp, & tt {
+    font-size: 16px;
+    line-height: 0;
+  }
+}
+
+p {
+  padding: 0;
+  margin: 0.5em 0;
+  text-align: left;
+}
+div {
+  margin: 0;
+}
+.alignRight {
+  margin: 1em 0;
+  &.art-text {
+    background-color: var(--highlight-color);
+    border: 1px solid var(--line-color);
+    border-radius: 3px;
+    padding: 0.5em 1em 0;
+    margin-bottom: 0.5em;
+    & pre {
+      padding: 0;
+      width: auto;
+    }
+  }
+  & > *:first-child {
+    border: none;
+    margin: 0;
+    float: right;
+    clear: both;
+  }
+  & > *:nth-child(2) {
+    clear: both;
+    display: block;
+    border: none;
+  }
+}
+svg {
+  display: block;
+  /* font-family isn't space-separated, but =~ will have to do */
+  &[font-family~="monospace" i], & [font-family~="monospace" i] {
+    font-family: var(--font-mono);
+  }
+}
+.alignCenter {
+  margin: 1em 0;
+  &.art-text {
+    background-color: var(--highlight-color);
+    border: 1px solid var(--line-color);
+    border-radius: 3px;
+    padding: 0.5em 1em 0;
+    margin-bottom: 0.5em;
+    & pre {
+      padding: 0;
+      width: auto;
+    }
+  }
+  & > *:first-child {
+    border: none;
+    /* this isn't optimal, but it's an existence proof.  PrinceXML doesn't
+       support flexbox yet.
+    */
+    display: table;
+    margin: 0 auto;
+  }
+}
+
+/* lists */
+ol, ul {
+  padding: 0;
+  margin: 0 0 0.5em 2em;
+  & :is(ol, ul) {
+    margin-left: 1em;
+  }
+}
+li {
+  margin: 0 0 0.25em 0;
+}
+ul.empty, .ulEmpty {
+  list-style-type: none;
+  & li {
+    margin-top: 0.5em;
+  }
+}
+:is(ul, ol).compact, .ulCompact, .olCompact {
+  margin: 0 0 0 2em;
+  & li {
+    margin: 0;
+    & :first-child { margin-top: 0; }
+    & :last-child { margin-bottom: 0; }
+  }
+}
+
+/* definition lists */
+dl {
+  clear: left;
+  --indent: 3ch;
+  /* --indent: attr(indent ch); not supported in any browser, but we can dream */
+  &.olPercent {
+    --indent: 5ch;
+    & > dt {
+      min-width: calc(var(--indent) - 2ch);
+      float: none;
+    }
+  }
+
+  dl > dd > & {
+    margin-top: 0.5em;
+    margin-bottom: 0;
+  }
+
+  &:not(.dlNewline) > dt {
+    float: left;
+    margin-right: 2ch;
+    min-width: 8ch;
+  }
+  & > dd {
+    margin-bottom: .8em;
+    margin-left: var(--indent) !important; /* stupid element overrides */
+    min-height: 2ex;
+  }
+}
+:is(dl.compact, .dlCompact) > dd {
+  margin-bottom: 0;
+  & > :is(:first-child, .break:first-child + *) {
+    margin-top: 0;
+  }
+  & > :is(:last-child) {
+    margin-bottom: 0;
+  }
+}
+:is(dd, span).break {
+  display: none;
+}
+
+/* links */
+a {
+  text-decoration: none;
+  &[href] {
+    color: var(--link-color);
+    &:hover { text-decoration: underline; }
+    &.selfRef {
+      color: var(--text-color);
+      &:hover {
+        text-decoration: none;
+        background-color: var(--highlight-color);
+      }
+    }
+  }
+}
+.iref + a[href].internal {
+  color: var(--text-color);
+}
+a.xref:is(.cite, .auto), :is(#status-of-memo, #copyright) a {
+  white-space: nowrap;
+}
+
+/* Figures */
+tt, code, pre {
+  background-color: var(--highlight-color);
+  font: 14px/22px var(--font-mono);
+}
+tt, code {
+  /* changing the font for inline elements leads to different ascender
+     and descender heights; as we want to retain baseline alignment,
+     remove leading to avoid altering the final height of lines
+     note: this fails if these blocks take an entire line,
+     a different solution would be great */
+  line-height: 0;
+}
+:is(h1, h2, h3, h4, h5, h6) :is(tt, code) {
+  font-size: 84%;
+}
+pre {
+  border: 1px solid var(--line-color);
+  font-size: 13.5px;
+  line-height: 16px;
+  letter-spacing: -0.2px;
+  margin: 5px;
+  padding: 5px;
+}
+img {
+  max-width: 100%;
+}
+figure {
+  margin: 0.5em 0;
+  padding: 0;
+  & blockquote {
+    margin: 0.8em 0.4em 0.4em;
+  }
+}
+figcaption, caption {
+  font-style: italic;
+  margin: 0.5em 1.5em;
+  text-align: left;
+  caption-side: bottom;
+}
+@media screen {
+  /* Auto-collapse boilerplate. */
+  :is(#status-of-memo, #copyright) {
+    & p {
+      margin: -2px 0;
+      max-height: 0;
+      transition: max-height 2s ease, margin 0.5s ease 0.5s;
+      overflow: hidden;
+    }
+    &:hover p,
+    & h2:target ~ p {
+      margin: 0.5em 0;
+      max-height: 500px;
+      overflow: auto;
+    }
+  }
+  pre, svg {
+    display: inline-block;
+    /* In the horizontal direction, sometimes people make over-sized figures.
+       Scrollbars for those is therefore necessary: auto adds them as necessary..
+       In the vertical direction, the line-height can combine with the font
+       asender/descender height to produce scrollbars: hidden avoids that. */
+    overflow: auto hidden;
+  }
+  pre {
+    max-width: 100%;
+    width: calc(100% - 22px - 1em);
+  }
+  svg {
+    max-width: calc(100% - 22px - 1em);
+  }
+  figure pre {
+    display: block;
+    width: calc(100% - 25px);
+  }
+  :is(pre, svg) + .pilcrow {
+    display: inline-block;
+    vertical-align: text-bottom;
+    padding-bottom: 8px;
+  }
+}
+
+/* aside, blockquote */
+aside, blockquote {
+  margin-left: 0;
+  padding: 0 2em;
+  font-style: italic;
+}
+blockquote {
+  margin: 1em 0;
+  border-left: 2px var(--pilcrow-strong) solid;
+}
+cite {
+  display: block;
+  text-align: right;
+  font-style: italic;
+}
+
+/* tables */
+table {
+  width: auto;
+  max-width: 100%;
+  margin: 0 0 1em;
+  border-collapse: collapse;
+  &.right { margin-left: auto; }
+  &.center { margin-left: auto; margin-right: auto; }
+  &.left { margin-right: auto; }
+  & .text-left { text-align: left; }
+  & .text-center { text-align: center; }
+  & .text-right { text-align: right; }
+  & caption {
+    margin: 0;
+    padding: 3px 0 3px 1em;
+  }
+  & p { margin: 0; }
+}
+
+thead, tbody {
+  border: 1px solid var(--line-color);
+}
+th, td {
+  text-align: left;
+  vertical-align: top;
+  padding: 5px 10px;
+}
+th {
+  background-color: var(--line-color);
+}
+:is(tr:nth-child(2n), thead+tbody > tr:nth-child(2n+1)) > td {
+  background-color: var(--background-color);
+}
+:is(tr:nth-child(2n+1), thead+tbody > tr:nth-child(2n)) > td {
+  background-color: var(--highlight-color);
+}
+
+/* pilcrow */
+a.pilcrow {
+  margin-left: 3px;
+  opacity: 0.2;
+  user-select: none;
+  &[href] {
+    color: var(--pilcrow-weak);
+    &:hover { text-decoration: none; }
+  }
+  @media not print {
+    :hover > &, &:focus {
+      opacity: 1;
+    }
+    &[href]:hover {
+      color: var(--pilcrow-strong);
+      background-color: transparent;
+    }
+  }
+  @media print {
+    display: none;
+  }
+}
+
+/* misc */
+hr {
+  border: 0;
+  border-top: 1px solid var(--line-color);
+}
+.bcp14 {
+  font-variant: small-caps;
+  font-weight: 600;
+  font-size: var(--small-font-size);
+}
+.role {
+  font-variant: all-small-caps;
+}
+sub, sup {
+  line-height: 1;
+  font-size: 80%;
+}
+
+/* info block */
+#identifiers {
+  margin: 0;
+  font-size: var(--small-font-size);
+  line-height: 18px;
+  --identifier-width: 15ch;
+  & dt {
+    width: var(--identifier-width);
+    min-width: var(--identifier-width);
+    clear: left;
+    float: left;
+    text-align: right;
+    margin-right: 1ch;
+  }
+  & dd {
+    margin: 0;
+    margin-left: calc(1em + var(--identifier-width)) !important;
+    min-width: 5em;
+  }
+  & .authors {
+    & .author {
+      display: inline-block;
+      margin-right: 1.5em;
+    }
+    & .org {
+      font-style: italic;
+    }
+  }
+}
+
+/* The prepared/rendered info at the very bottom of the page */
+.docInfo {
+  color: #999;
+  font-size: 0.9em;
+  font-style: italic;
+  margin-top: 2em;
+  & .prepared {
+    float: right;
+  }
+}
+
+/* table of contents */
+#toc {
+  padding: 0.75em 0 2em 0;
+  margin-bottom: 1em;
+
+  & nav {
+    & ul {
+      margin: 0 0.5em 0 0;
+      padding: 0;
+      list-style: none;
+    }
+    & li {
+      line-height: 1.3em;
+      margin: 2px 0;
+      padding-left: 1.2em;
+      text-indent: -1.2em;
+    }
+  }
+  & a.xref {
+    white-space: normal;
+  }
+}
+
+.references {
+  & > dt {
+    text-align: right;
+    font-weight: bold;
+    min-width: 10ch;
+    margin-right: 1.5ch;
+    &:target::before {
+      content: "⇒";
+      margin: 0 10px 0 -25px;
+    }
+  }
+  & > dd {
+    margin-left: 12ch !important;
+    overflow: visible;
+    & .refInstance {
+      margin-bottom: 0.8em;
+    }
+    & .ascii {
+      margin-bottom: 0.25em;
+    }
+  }
+}
+
+#rfc\.index\.index + ul {
+  margin-left: 0;
+}
+
+/* authors */
+address.vcard {
+  font-style: normal;
+  max-width: 20em;
+  margin: 1em auto 1em 0;
+
+  & .nameRole {
+    font-weight: 700;
+    margin-left: 0;
+  }
+  & .label {
+    margin: 0.5em 0;
+  }
+  & .type {
+    display: none;
+  }
+  & .alternative-contact {
+    margin: 0.5em 0 0.25em 0;
+  }
+  & .non-ascii {
+    margin: 0 0 0 2em;
+  }
+  & div.left {
+    text-align: left;
+  }
+  & div.right {
+    text-align: right;
+  }
+}
+
+hr.addr {
+  border-top: 1px dashed;
+  margin: 0;
+  color: #ddd;
+  max-width: calc(100% - 16px);
+}
+@media (min-width: 500px) {
+  #authors-addresses {
+    & > section {
+      column-count: 2;
+      column-gap: 20px;
+    }
+    & > section > h2 {
+      column-span: all;
+    }
+    /* hack for break-inside: avoid-column */
+    & address {
+      display: inline-block;
+      break-inside: avoid-column;
+    }
+  }
+}
+
+/* Comments */
+.rfcEditorRemove {
+  & p:first-of-type {
+    font-style: italic;
+  }
+}
+.cref {
+  background-color: rgba(249, 232, 105, 0.3);
+  padding: 2px 4px;
+}
+.crefSource {
+  font-style: italic;
+}
+
+@media screen {
+  #toc {
+    & nav {
+      font-family: var(--font-title);
+      font-weight: 360;
+      & > ul { margin-bottom: 2em; }
+      & ul {
+        margin: 0 0 0 4px;
+        & :is(p, li) {
+          margin: 2px 0;
+        }
+      }
+    }
+    & a.toplink {
+      float: right;
+    }
+  }
+}
+@media not screen {
+  #toc a.toplink {
+    display: none;
+  }
+}
+
+
+/* TOC layout for smaller screens */
+@media screen and (max-width: 929px) {
+  #toc {
+    position: fixed;
+    z-index: 2;
+    top: 0;
+    right: 0;
+    padding: 1px 0 0 0;
+    margin: 0;
+    border-bottom: 1px solid #ccc;
+    opacity: 0.6;
+    & h2 {
+      margin: 0;
+      padding: 2px 0 2px 6px;
+      padding-right: 1em;
+      font-size: 18px;
+      line-height: 24px;
+      min-width: 190px;
+      text-align: right;
+      background-color: #444;
+      color: white;
+      cursor: pointer;
+      &::before { /* css hamburger */
+        float: right;
+        position: relative;
+        width: 1em;
+        height: 1px;
+        left: -164px;
+        margin: 8px 0 0 0;
+        background: white none repeat scroll 0 0;
+        box-shadow: 0 4px 0 0 white, 0 8px 0 0 white;
+        content: "";
+      }
+    }
+    & nav {
+      display: none;
+      background-color: var(--background-color);
+      padding: 0.5em 1em 1em;
+      overflow: auto;
+      overscroll-behavior: contain;
+      height: calc(100vh - 48px);
+      border-left: 1px solid #ddd;
+    }
+    &.active {
+      opacity: 1;
+      & nav { display: block; }
+    }
+    /* Make the collapsed ToC header render white on gray also when it's a link */
+    & h2 a,
+    & h2 a:is(:link, :focus, :hover),
+    & a.toplink,
+    & a.toplink:hover {
+      color: white;
+      background-color: #444;
+      text-decoration: none;
+    }
+    & a.toplink {
+      margin: 2px 0.5em 0;
+    }
+  }
+}
+
+/* TOC layout for wide screens */
+@media screen and (min-width: 930px) {
+  body {
+    padding-right: 360px;
+    padding-right: calc(min(180px + 20%, 500px));
+  }
+  #toc {
+    position: fixed;
+    bottom: 0;
+    right: 0;
+    right: calc(50vw - 480px);
+    width: 312px;
+    margin: 0;
+    padding: 0;
+    z-index: 1;
+    & h2 {
+      margin: 0;
+      padding: 0.25em 1em 1em 0;
+    }
+    & nav {
+      display: block;
+      height: calc(90vh - 84px);
+      bottom: 0;
+      padding: 0.5em 0 2em;
+      overflow: auto;
+      overscroll-behavior: contain;
+      scrollbar-width: thin;
+    }
+    & a.toplink {
+      margin: 8px 0.5em 0;
+    }
+  }
+  img { /* future proofing */
+    max-width: 100%;
+    height: auto;
+  }
+}
+
+/* pagination */
+@media print {
+  body {
+    width: 100%;
+  }
+  p {
+    orphans: 3;
+    widows: 3;
+  }
+  #n-copyright-notice {
+    border-bottom: none;
+  }
+  #toc {
+    page-break-before: always;
+    border-top: none;
+    padding-top: 0;
+  }
+  #n-introduction {
+    page-break-before: always;
+  }
+  figure, pre, .vcard {
+    page-break-inside: avoid;
+  }
+  h1, h2, h3, h4, h5, h6 {
+    page-break-after: avoid;
+  }
+  :is(h2, h3, h4, h5, h6)+*, dd {
+    page-break-before: avoid;
+  }
+  pre {
+    white-space: pre-wrap;
+    word-wrap: break-word;
+    font-size: 10pt;
+  }
+  table {
+    border: 1px solid #ddd;
+  }
+  td {
+    border-top: 1px solid #ddd;
+  }
+}
+
+@page :first {
+  padding-top: 0;
+  @top-left {
+    content: normal;
+    border: none;
+  }
+  @top-center {
+    content: normal;
+    border: none;
+  }
+  @top-right {
+    content: normal;
+    border: none;
+  }
+}
+
+@page {
+  size: A4;
+  margin-bottom: 45mm;
+  padding-top: 20px;
+}
+
+/* Dark mode. */
+@media (prefers-color-scheme: dark) {
+:root {
+  --background-color: #121212;
+  --text-color: #f0f0f0;
+  --title-color: #fff;
+  --link-color: #4da4f0;
+  --highlight-color: #282828;
+  --line-color: #444;
+  --pilcrow-weak: #444;
+  --pilcrow-strong: #666;
+  scrollbar-color: #777 #333;
+}
+}
+
+/* SVG Trick: a prefix match works because only black and white are allowed */
+svg {
+  & :is([stroke="black"], [stroke^="#000"]) {
+    stroke: var(--text-color);
+  }
+  & :is([stroke="white"], [stroke^="#fff"]) {
+    stroke: var(--background-color);
+  }
+  & :is([fill="black"], [fill^="#000"], :not([fill], [fill] *)) {
+    fill: var(--text-color);
+  }
+  & :is([fill="white"], [fill^="#fff"]) {
+    fill: var(--background-color);
+  }
+}
+</style>
+
+</head>
+<body class="xml2rfc">
+<table class="ears">
+<thead><tr>
+<td class="left">Internet-Draft</td>
+<td class="center">SCION SvcParamKey</td>
+<td class="right">November 2026</td>
+</tr></thead>
+<tfoot><tr>
+<td class="left">John, et al.</td>
+<td class="center">Expires 16 May 2027</td>
+<td class="right">[Page]</td>
+</tr></tfoot>
+</table>
+<div id="external-metadata" class="document-information"></div>
+<div id="internal-metadata" class="document-information">
+<dl id="identifiers">
+<dt class="label-workgroup">Workgroup:</dt>
+<dd class="workgroup">Network Working Group</dd>
+<dt class="label-internet-draft">Internet-Draft:</dt>
+<dd class="internet-draft">draft-john-scion-svcb-latest</dd>
+<dt class="label-published">Published:</dt>
+<dd class="published">
+<time datetime="2026-11-12" class="published">12 November 2026</time>
+    </dd>
+<dt class="label-intended-status">Intended Status:</dt>
+<dd class="intended-status">Informational</dd>
+<dt class="label-expires">Expires:</dt>
+<dd class="expires"><time datetime="2027-05-16">16 May 2027</time></dd>
+<dt class="label-authors">Authors:</dt>
+<dd class="authors">
+<div class="author">
+      <div class="author-name">T. John</div>
+<div class="org">OVGU Magdeburg</div>
+</div>
+<div class="author">
+      <div class="author-name">J. van Bommel</div>
+<div class="org">ETH Zurich</div>
+</div>
+<div class="author">
+      <div class="author-name">T. Zäschke</div>
+<div class="org">ETH Zurich</div>
+</div>
+<div class="author">
+      <div class="author-name">L. Schulz</div>
+<div class="org">OVGU Magdeburg</div>
+</div>
+<div class="author">
+      <div class="author-name">N. Rustignoli</div>
+<div class="org">SCION Association</div>
+</div>
+</dd>
+</dl>
+</div>
+<h1 id="title">Publishing SCION Endpoint Addresses in DNS Service Binding (SVCB) Records</h1>
+<section id="section-abstract">
+      <h2 id="abstract"><a href="#abstract" class="selfRef">Abstract</a></h2>
+<p id="section-abstract-1">This document defines "scion", a Service Parameter Key (SvcParamKey) for
+the Service Binding (SVCB) and HTTPS DNS resource records. Its value
+lists the addresses at which a service endpoint is reachable over SCION
+(Scalability, Control, and Isolation On Next-generation networks), a
+path-aware inter-domain network architecture. This document specifies
+the wire format, presentation format, and semantics of the key and
+requests its registration with IANA.<a href="#section-abstract-1" class="pilcrow">¶</a></p>
+</section>
+<section class="note rfcEditorRemove" id="section-note.1">
+      <h2 id="name-about-this-document">
+<a href="#name-about-this-document" class="section-name selfRef">About This Document</a>
+      </h2>
+<p id="section-note.1-1">This note is to be removed before publishing as an RFC.<a href="#section-note.1-1" class="pilcrow">¶</a></p>
+<p id="section-note.1-2">
+        Status information for this document may be found at <span><a href="https://datatracker.ietf.org/doc/draft-john-scion-svcb/">https://datatracker.ietf.org/doc/draft-john-scion-svcb/</a></span>.<a href="#section-note.1-2" class="pilcrow">¶</a></p>
+<p id="section-note.1-3">Source for this draft and an issue tracker can be found at
+        <span><a href="https://github.com/netsys-lab/draft-scion-svcb">https://github.com/netsys-lab/draft-scion-svcb</a></span>.<a href="#section-note.1-3" class="pilcrow">¶</a></p>
+</section>
+<div id="status-of-memo">
+<section id="section-boilerplate.1">
+        <h2 id="name-status-of-this-memo">
+<a href="#name-status-of-this-memo" class="section-name selfRef">Status of This Memo</a>
+        </h2>
+<p id="section-boilerplate.1-1">
+        This Internet-Draft is submitted in full conformance with the
+        provisions of BCP 78 and BCP 79.<a href="#section-boilerplate.1-1" class="pilcrow">¶</a></p>
+<p id="section-boilerplate.1-2">
+        Internet-Drafts are working documents of the Internet Engineering Task
+        Force (IETF). Note that other groups may also distribute working
+        documents as Internet-Drafts. The list of current Internet-Drafts is
+        at <span><a href="https://datatracker.ietf.org/drafts/current/">https://datatracker.ietf.org/drafts/current/</a></span>.<a href="#section-boilerplate.1-2" class="pilcrow">¶</a></p>
+<p id="section-boilerplate.1-3">
+        Internet-Drafts are draft documents valid for a maximum of six months
+        and may be updated, replaced, or obsoleted by other documents at any
+        time. It is inappropriate to use Internet-Drafts as reference
+        material or to cite them other than as "work in progress."<a href="#section-boilerplate.1-3" class="pilcrow">¶</a></p>
+<p id="section-boilerplate.1-4">
+        This Internet-Draft will expire on 16 May 2027.<a href="#section-boilerplate.1-4" class="pilcrow">¶</a></p>
+</section>
+</div>
+<div id="copyright">
+<section id="section-boilerplate.2">
+        <h2 id="name-copyright-notice">
+<a href="#name-copyright-notice" class="section-name selfRef">Copyright Notice</a>
+        </h2>
+<p id="section-boilerplate.2-1">
+            Copyright (c) 2026 IETF Trust and the persons identified as the
+            document authors. All rights reserved.<a href="#section-boilerplate.2-1" class="pilcrow">¶</a></p>
+<p id="section-boilerplate.2-2">
+            This document is subject to BCP 78 and the IETF Trust's Legal
+            Provisions Relating to IETF Documents
+            (<span><a href="https://trustee.ietf.org/license-info">https://trustee.ietf.org/license-info</a></span>) in effect on the date of
+            publication of this document. Please review these documents
+            carefully, as they describe your rights and restrictions with
+            respect to this document.<a href="#section-boilerplate.2-2" class="pilcrow">¶</a></p>
+</section>
+</div>
+<div id="toc">
+<section id="section-toc.1">
+        <a href="#" onclick="scroll(0,0)" class="toplink">▲</a><h2 id="name-table-of-contents">
+<a href="#name-table-of-contents" class="section-name selfRef">Table of Contents</a>
+        </h2>
+<nav class="toc"><ul class="compact toc ulBare ulEmpty">
+<li class="compact toc ulBare ulEmpty" id="section-toc.1-1.1">
+            <p id="section-toc.1-1.1.1" class="keepWithNext"><a href="#section-1" class="auto internal xref">1</a>.  <a href="#name-introduction" class="internal xref">Introduction</a></p>
+</li>
+          <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.2">
+            <p id="section-toc.1-1.2.1" class="keepWithNext"><a href="#section-2" class="auto internal xref">2</a>.  <a href="#name-conventions-and-definitions" class="internal xref">Conventions and Definitions</a></p>
+</li>
+          <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.3">
+            <p id="section-toc.1-1.3.1"><a href="#section-3" class="auto internal xref">3</a>.  <a href="#name-the-scion-svcparamkey" class="internal xref">The "scion" SvcParamKey</a></p>
+<ul class="compact toc ulBare ulEmpty">
+<li class="compact toc ulBare ulEmpty" id="section-toc.1-1.3.2.1">
+                <p id="section-toc.1-1.3.2.1.1" class="keepWithNext"><a href="#section-3.1" class="auto internal xref">3.1</a>.  <a href="#name-wire-format" class="internal xref">Wire Format</a></p>
+</li>
+              <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.3.2.2">
+                <p id="section-toc.1-1.3.2.2.1"><a href="#section-3.2" class="auto internal xref">3.2</a>.  <a href="#name-presentation-format" class="internal xref">Presentation Format</a></p>
+<ul class="compact toc ulBare ulEmpty">
+<li class="compact toc ulBare ulEmpty" id="section-toc.1-1.3.2.2.2.1">
+                    <p id="section-toc.1-1.3.2.2.2.1.1"><a href="#section-3.2.1" class="auto internal xref">3.2.1</a>.  <a href="#name-canonical-rendering" class="internal xref">Canonical Rendering</a></p>
+</li>
+                </ul>
+</li>
+              <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.3.2.3">
+                <p id="section-toc.1-1.3.2.3.1"><a href="#section-3.3" class="auto internal xref">3.3</a>.  <a href="#name-semantics" class="internal xref">Semantics</a></p>
+<ul class="compact toc ulBare ulEmpty">
+<li class="compact toc ulBare ulEmpty" id="section-toc.1-1.3.2.3.2.1">
+                    <p id="section-toc.1-1.3.2.3.2.1.1"><a href="#section-3.3.1" class="auto internal xref">3.3.1</a>.  <a href="#name-unusable-addresses" class="internal xref">Unusable Addresses</a></p>
+</li>
+                  <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.3.2.3.2.2">
+                    <p id="section-toc.1-1.3.2.3.2.2.1"><a href="#section-3.3.2" class="auto internal xref">3.3.2</a>.  <a href="#name-the-mandatory-key" class="internal xref">The "mandatory" Key</a></p>
+</li>
+                </ul>
+</li>
+            </ul>
+</li>
+          <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.4">
+            <p id="section-toc.1-1.4.1"><a href="#section-4" class="auto internal xref">4</a>.  <a href="#name-operational-considerations" class="internal xref">Operational Considerations</a></p>
+<ul class="compact toc ulBare ulEmpty">
+<li class="compact toc ulBare ulEmpty" id="section-toc.1-1.4.2.1">
+                <p id="section-toc.1-1.4.2.1.1"><a href="#section-4.1" class="auto internal xref">4.1</a>.  <a href="#name-endpoints-reachable-only-ov" class="internal xref">Endpoints Reachable Only over SCION</a></p>
+</li>
+              <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.4.2.2">
+                <p id="section-toc.1-1.4.2.2.1"><a href="#section-4.2" class="auto internal xref">4.2</a>.  <a href="#name-codepoint-used-before-assig" class="internal xref">Codepoint Used Before Assignment</a></p>
+</li>
+            </ul>
+</li>
+          <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.5">
+            <p id="section-toc.1-1.5.1"><a href="#section-5" class="auto internal xref">5</a>.  <a href="#name-security-considerations" class="internal xref">Security Considerations</a></p>
+<ul class="compact toc ulBare ulEmpty">
+<li class="compact toc ulBare ulEmpty" id="section-toc.1-1.5.2.1">
+                <p id="section-toc.1-1.5.2.1.1"><a href="#section-5.1" class="auto internal xref">5.1</a>.  <a href="#name-endpoint-authentication" class="internal xref">Endpoint Authentication</a></p>
+</li>
+              <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.5.2.2">
+                <p id="section-toc.1-1.5.2.2.1"><a href="#section-5.2" class="auto internal xref">5.2</a>.  <a href="#name-internal-targets" class="internal xref">Internal Targets</a></p>
+</li>
+              <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.5.2.3">
+                <p id="section-toc.1-1.5.2.3.1"><a href="#section-5.3" class="auto internal xref">5.3</a>.  <a href="#name-removal-of-the-key" class="internal xref">Removal of the Key</a></p>
+</li>
+              <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.5.2.4">
+                <p id="section-toc.1-1.5.2.4.1"><a href="#section-5.4" class="auto internal xref">5.4</a>.  <a href="#name-resource-consumption" class="internal xref">Resource Consumption</a></p>
+</li>
+            </ul>
+</li>
+          <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.6">
+            <p id="section-toc.1-1.6.1"><a href="#section-6" class="auto internal xref">6</a>.  <a href="#name-privacy-considerations" class="internal xref">Privacy Considerations</a></p>
+</li>
+          <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.7">
+            <p id="section-toc.1-1.7.1"><a href="#section-7" class="auto internal xref">7</a>.  <a href="#name-iana-considerations" class="internal xref">IANA Considerations</a></p>
+</li>
+          <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.8">
+            <p id="section-toc.1-1.8.1"><a href="#section-8" class="auto internal xref">8</a>.  <a href="#name-references" class="internal xref">References</a></p>
+<ul class="compact toc ulBare ulEmpty">
+<li class="compact toc ulBare ulEmpty" id="section-toc.1-1.8.2.1">
+                <p id="section-toc.1-1.8.2.1.1"><a href="#section-8.1" class="auto internal xref">8.1</a>.  <a href="#name-normative-references" class="internal xref">Normative References</a></p>
+</li>
+              <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.8.2.2">
+                <p id="section-toc.1-1.8.2.2.1"><a href="#section-8.2" class="auto internal xref">8.2</a>.  <a href="#name-informative-references" class="internal xref">Informative References</a></p>
+</li>
+            </ul>
+</li>
+          <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.9">
+            <p id="section-toc.1-1.9.1"><a href="#appendix-A" class="auto internal xref">Appendix A</a>.  <a href="#name-examples" class="internal xref">Examples</a></p>
+</li>
+          <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.10">
+            <p id="section-toc.1-1.10.1"><a href="#appendix-B" class="auto internal xref">Appendix B</a>.  <a href="#name-test-vectors" class="internal xref">Test Vectors</a></p>
+<ul class="compact toc ulBare ulEmpty">
+<li class="compact toc ulBare ulEmpty" id="section-toc.1-1.10.2.1">
+                <p id="section-toc.1-1.10.2.1.1"><a href="#appendix-B.1" class="auto internal xref">B.1</a>.  <a href="#name-wire-format-2" class="internal xref">Wire Format</a></p>
+</li>
+              <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.10.2.2">
+                <p id="section-toc.1-1.10.2.2.1"><a href="#appendix-B.2" class="auto internal xref">B.2</a>.  <a href="#name-canonical-rendering-2" class="internal xref">Canonical Rendering</a></p>
+</li>
+              <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.10.2.3">
+                <p id="section-toc.1-1.10.2.3.1"><a href="#appendix-B.3" class="auto internal xref">B.3</a>.  <a href="#name-invalid-and-unusable-values" class="internal xref">Invalid and Unusable Values</a></p>
+</li>
+            </ul>
+</li>
+          <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.11">
+            <p id="section-toc.1-1.11.1"><a href="#appendix-C" class="auto internal xref">Appendix C</a>.  <a href="#name-design-rationale" class="internal xref">Design Rationale</a></p>
+</li>
+          <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.12">
+            <p id="section-toc.1-1.12.1"><a href="#appendix-D" class="auto internal xref">Appendix D</a>.  <a href="#name-implementation-status" class="internal xref">Implementation Status</a></p>
+</li>
+          <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.13">
+            <p id="section-toc.1-1.13.1"><a href="#appendix-E" class="auto internal xref"></a><a href="#name-acknowledgments" class="internal xref">Acknowledgments</a></p>
+</li>
+          <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.14">
+            <p id="section-toc.1-1.14.1"><a href="#appendix-F" class="auto internal xref"></a><a href="#name-authors-addresses" class="internal xref">Authors' Addresses</a></p>
+</li>
+        </ul>
+</nav>
+</section>
+</div>
+<div id="introduction">
+<section id="section-1">
+      <h2 id="name-introduction">
+<a href="#section-1" class="section-number selfRef">1. </a><a href="#name-introduction" class="section-name selfRef">Introduction</a>
+      </h2>
+<p id="section-1-1">SCION (Scalability, Control, and Isolation On Next-generation networks)
+<span>[<a href="#I-D.dekater-scion-controlplane" class="cite xref">I-D.dekater-scion-controlplane</a>]</span> <span>[<a href="#I-D.dekater-scion-dataplane" class="cite xref">I-D.dekater-scion-dataplane</a>]</span> is a
+path-aware inter-domain network architecture <span>[<a href="#RFC9217" class="cite xref">RFC9217</a>]</span>. A SCION
+endpoint is identified by a SCION address, which consists of an
+Isolation Domain (ISD) number, a SCION Autonomous System (AS) number,
+and a host address.<a href="#section-1-1" class="pilcrow">¶</a></p>
+<p id="section-1-2">No standard way exists to publish SCION addresses in the DNS. Current
+deployments use TXT records of the form "scion=ISD-AS,host" (Section
+3.3 of <span>[<a href="#I-D.meynell-panrg-scion-research-questions" class="cite xref">I-D.meynell-panrg-scion-research-questions</a>]</span>), which cannot be
+associated with
+the protocols, port, Encrypted ClientHello (ECH) configuration
+<span>[<a href="#RFC9848" class="cite xref">RFC9848</a>]</span>, and priority that SVCB and HTTPS records <span>[<a href="#RFC9460" class="cite xref">RFC9460</a>]</span> carry
+for an endpoint.<a href="#section-1-2" class="pilcrow">¶</a></p>
+<p id="section-1-3">This document defines the "scion" SvcParamKey, which lists the SCION
+addresses of the alternative endpoint of a ServiceMode record.<a href="#section-1-3" class="pilcrow">¶</a></p>
+</section>
+</div>
+<div id="conventions-and-definitions">
+<section id="section-2">
+      <h2 id="name-conventions-and-definitions">
+<a href="#section-2" class="section-number selfRef">2. </a><a href="#name-conventions-and-definitions" class="section-name selfRef">Conventions and Definitions</a>
+      </h2>
+<p id="section-2-1">The key words "<span class="bcp14">MUST</span>", "<span class="bcp14">MUST NOT</span>", "<span class="bcp14">REQUIRED</span>", "<span class="bcp14">SHALL</span>", "<span class="bcp14">SHALL NOT</span>", "<span class="bcp14">SHOULD</span>", "<span class="bcp14">SHOULD NOT</span>", "<span class="bcp14">RECOMMENDED</span>", "<span class="bcp14">NOT RECOMMENDED</span>",
+"<span class="bcp14">MAY</span>", and "<span class="bcp14">OPTIONAL</span>" in this document are to be interpreted as
+described in BCP 14 <span>[<a href="#RFC2119" class="cite xref">RFC2119</a>]</span> <span>[<a href="#RFC8174" class="cite xref">RFC8174</a>]</span> when, and only when, they
+appear in all capitals, as shown here.<a href="#section-2-1" class="pilcrow">¶</a></p>
+<p id="section-2-2">This document uses the following terms:<a href="#section-2-2" class="pilcrow">¶</a></p>
+<span class="break"></span><dl class="dlParallel" id="section-2-3">
+        <dt id="section-2-3.1">ISD number:</dt>
+        <dd style="margin-left: 1.5em" id="section-2-3.2">
+          <p id="section-2-3.2.1">A 16-bit number identifying a SCION Isolation Domain (Section 1.5.1 of
+<span>[<a href="#I-D.dekater-scion-controlplane" class="cite xref">I-D.dekater-scion-controlplane</a>]</span>).<a href="#section-2-3.2.1" class="pilcrow">¶</a></p>
+</dd>
+        <dd class="break"></dd>
+<dt id="section-2-3.3">AS number:</dt>
+        <dd style="margin-left: 1.5em" id="section-2-3.4">
+          <p id="section-2-3.4.1">A 48-bit number identifying a SCION Autonomous System (Section 1.5.2
+of <span>[<a href="#I-D.dekater-scion-controlplane" class="cite xref">I-D.dekater-scion-controlplane</a>]</span>).<a href="#section-2-3.4.1" class="pilcrow">¶</a></p>
+</dd>
+        <dd class="break"></dd>
+<dt id="section-2-3.5">Host address:</dt>
+        <dd style="margin-left: 1.5em" id="section-2-3.6">
+          <p id="section-2-3.6.1">The address of an endpoint within its SCION AS, interpreted only
+within that AS. SCION carries IPv4 (4-octet), IPv6 (16-octet), and
+other host address types (Section 2.1.2 of
+<span>[<a href="#I-D.dekater-scion-dataplane" class="cite xref">I-D.dekater-scion-dataplane</a>]</span>); this document covers IPv4 and IPv6
+host addresses only.<a href="#section-2-3.6.1" class="pilcrow">¶</a></p>
+</dd>
+        <dd class="break"></dd>
+<dt id="section-2-3.7">SCION address:</dt>
+        <dd style="margin-left: 1.5em" id="section-2-3.8">
+          <p id="section-2-3.8.1">The combination of an ISD number, an AS number, and a host address.<a href="#section-2-3.8.1" class="pilcrow">¶</a></p>
+</dd>
+      <dd class="break"></dd>
+</dl>
+</section>
+</div>
+<div id="key">
+<section id="section-3">
+      <h2 id="name-the-scion-svcparamkey">
+<a href="#section-3" class="section-number selfRef">3. </a><a href="#name-the-scion-svcparamkey" class="section-name selfRef">The "scion" SvcParamKey</a>
+      </h2>
+<div id="wire">
+<section id="section-3.1">
+        <h3 id="name-wire-format">
+<a href="#section-3.1" class="section-number selfRef">3.1. </a><a href="#name-wire-format" class="section-name selfRef">Wire Format</a>
+        </h3>
+<p id="section-3.1-1">The SvcParamValue is a sequence of one or more 24-octet blocks, each
+holding one SCION address:<a href="#section-3.1-1" class="pilcrow">¶</a></p>
+<span id="name-one-scion-address-block"></span><figure id="figure-1">
+          <div class="alignLeft art-ascii-art art-text artwork" id="section-3.1-2.1">
+<pre>
+ 0                   1                   2                   3
+ 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
++-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+|          ISD number           |                               |
++-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+                               +
+|                           AS number                           |
++-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+|                                                               |
++                                                               +
+|                                                               |
++                         Host address                          +
+|                                                               |
++                                                               +
+|                                                               |
++-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+</pre>
+</div>
+<figcaption><a href="#figure-1" class="selfRef">Figure 1</a>:
+<a href="#name-one-scion-address-block" class="selfRef">One SCION address block</a>
+          </figcaption></figure>
+<span class="break"></span><dl class="dlParallel" id="section-3.1-3">
+          <dt id="section-3.1-3.1">ISD number:</dt>
+          <dd style="margin-left: 1.5em" id="section-3.1-3.2">
+            <p id="section-3.1-3.2.1">2 octets, in network byte order.<a href="#section-3.1-3.2.1" class="pilcrow">¶</a></p>
+</dd>
+          <dd class="break"></dd>
+<dt id="section-3.1-3.3">AS number:</dt>
+          <dd style="margin-left: 1.5em" id="section-3.1-3.4">
+            <p id="section-3.1-3.4.1">6 octets, in network byte order.<a href="#section-3.1-3.4.1" class="pilcrow">¶</a></p>
+</dd>
+          <dd class="break"></dd>
+<dt id="section-3.1-3.5">Host address:</dt>
+          <dd style="margin-left: 1.5em" id="section-3.1-3.6">
+            <p id="section-3.1-3.6.1">16 octets. An IPv6 host address is carried as is. An IPv4 host address
+is carried as an IPv4-mapped IPv6 address (Section 2.5.5.2 of
+<span>[<a href="#RFC4291" class="cite xref">RFC4291</a>]</span>).<a href="#section-3.1-3.6.1" class="pilcrow">¶</a></p>
+</dd>
+        <dd class="break"></dd>
+</dl>
+<p id="section-3.1-4">A SvcParamValue whose length is zero or not a multiple of 24 octets
+does not have the expected format, so the RR is malformed and a client
+that implements this key <span class="bcp14">MUST</span> reject the entire RRset (Section 2.2 of
+<span>[<a href="#RFC9460" class="cite xref">RFC9460</a>]</span>). A value of any other length is well-formed, even if it
+contains unusable addresses (<a href="#unusable" class="auto internal xref">Section 3.3.1</a>).<a href="#section-3.1-4" class="pilcrow">¶</a></p>
+</section>
+</div>
+<div id="presentation">
+<section id="section-3.2">
+        <h3 id="name-presentation-format">
+<a href="#section-3.2" class="section-number selfRef">3.2. </a><a href="#name-presentation-format" class="section-name selfRef">Presentation Format</a>
+        </h3>
+<p id="section-3.2-1">The presentation value is a comma-separated list (Appendix A.1 of
+<span>[<a href="#RFC9460" class="cite xref">RFC9460</a>]</span>) of one or more SCION addresses. To enable simpler parsing,
+this SvcParamValue <span class="bcp14">MUST NOT</span> contain escape sequences. Each item matches
+the <code>scion-address</code> rule of the following ABNF <span>[<a href="#RFC5234" class="cite xref">RFC5234</a>]</span>. <code>DIGIT</code> and
+<code>HEXDIG</code> are defined in Appendix B.1 of <span>[<a href="#RFC5234" class="cite xref">RFC5234</a>]</span>; <code>IPv4address</code> and
+<code>IPv6address</code> are defined in Section 3.2.2 of <span>[<a href="#RFC3986" class="cite xref">RFC3986</a>]</span>.<a href="#section-3.2-1" class="pilcrow">¶</a></p>
+<div class="lang-abnf sourcecode" id="section-3.2-2">
+<pre>
+scion-address = isd "-" as "_" host
+isd           = 1*5DIGIT              ; decimal, 0-65535
+as            = as-dec / as-hex
+as-dec        = 1*10DIGIT             ; decimal, 0-4294967295
+as-hex        = 1*4HEXDIG ":" 1*4HEXDIG ":" 1*4HEXDIG
+host          = IPv4address / IPv6address
+</pre><a href="#section-3.2-2" class="pilcrow">¶</a>
+</div>
+<p id="section-3.2-3">The <code>isd</code> and <code>as-dec</code> values are decimal; leading zeros do not change
+the value. The <code>as-hex</code> form gives the AS number as three 16-bit groups
+in network byte order (Section 1.5.3.2 of
+<span>[<a href="#I-D.dekater-scion-controlplane" class="cite xref">I-D.dekater-scion-controlplane</a>]</span>). An IPv4 host address can be written
+in IPv4 form ("192.0.2.1") or in IPv4-mapped IPv6 form
+("::ffff:192.0.2.1"); both produce the same wire encoding.<a href="#section-3.2-3" class="pilcrow">¶</a></p>
+<p id="section-3.2-4">A presentation-format parser <span class="bcp14">MUST</span> reject a value in which any item does
+not match <code>scion-address</code>, has an ISD number above 65535, or has an
+<code>as-dec</code> value of 2^32 or more. Zone-file implementations <span class="bcp14">SHOULD</span> also
+reject a value that contains an unusable address (<a href="#unusable" class="auto internal xref">Section 3.3.1</a>).<a href="#section-3.2-4" class="pilcrow">¶</a></p>
+<p id="section-3.2-5">SCION tools write a SCION address as "ISD-AS,host". This document uses
+"_" in place of the "," so that values need no escaping.<a href="#section-3.2-5" class="pilcrow">¶</a></p>
+<div id="rendering">
+<section id="section-3.2.1">
+          <h4 id="name-canonical-rendering">
+<a href="#section-3.2.1" class="section-number selfRef">3.2.1. </a><a href="#name-canonical-rendering" class="section-name selfRef">Canonical Rendering</a>
+          </h4>
+<p id="section-3.2.1-1">When converting a wire-format value to presentation format, an
+implementation <span class="bcp14">MUST</span> render each SCION address as follows:<a href="#section-3.2.1-1" class="pilcrow">¶</a></p>
+<ul class="normal">
+<li class="normal" id="section-3.2.1-2.1">
+              <p id="section-3.2.1-2.1.1">the ISD number in decimal without leading zeros;<a href="#section-3.2.1-2.1.1" class="pilcrow">¶</a></p>
+</li>
+            <li class="normal" id="section-3.2.1-2.2">
+              <p id="section-3.2.1-2.2.1">the AS number in decimal without leading zeros if it is below 2^32,
+and otherwise in the <code>as-hex</code> form with lowercase hexadecimal digits,
+no leading zeros within a group, and "0" for a zero group (Section
+1.5.3.2 of <span>[<a href="#I-D.dekater-scion-controlplane" class="cite xref">I-D.dekater-scion-controlplane</a>]</span>);<a href="#section-3.2.1-2.2.1" class="pilcrow">¶</a></p>
+</li>
+            <li class="normal" id="section-3.2.1-2.3">
+              <p id="section-3.2.1-2.3.1">an IPv4-mapped host address in dotted-decimal IPv4 form, and any other
+host address in the form of Section 4 of <span>[<a href="#RFC5952" class="cite xref">RFC5952</a>]</span>, without the
+mixed notation of Section 5 of <span>[<a href="#RFC5952" class="cite xref">RFC5952</a>]</span>.<a href="#section-3.2.1-2.3.1" class="pilcrow">¶</a></p>
+</li>
+          </ul>
+<p id="section-3.2.1-3">An unusable address is rendered like any other, so a zone-file
+implementation that follows <a href="#presentation" class="auto internal xref">Section 3.2</a> rejects the rendered text.
+Zone transfers carry wire format and are not affected.
+A round trip through wire format preserves the value but not necessarily
+the text (<a href="#rendering-vectors" class="auto internal xref">Appendix B.2</a>). Two SCION addresses are the same
+address if their wire encodings are equal.<a href="#section-3.2.1-3" class="pilcrow">¶</a></p>
+</section>
+</div>
+</section>
+</div>
+<div id="semantics">
+<section id="section-3.3">
+        <h3 id="name-semantics">
+<a href="#section-3.3" class="section-number selfRef">3.3. </a><a href="#name-semantics" class="section-name selfRef">Semantics</a>
+        </h3>
+<p id="section-3.3-1">The "scion" SvcParamKey applies to HTTPS records and to SVCB records of
+any protocol mapping, unless that mapping specifies otherwise (Section 7
+of <span>[<a href="#RFC9460" class="cite xref">RFC9460</a>]</span>).<a href="#section-3.3-1" class="pilcrow">¶</a></p>
+<p id="section-3.3-2">The key indicates that the alternative endpoint named by the record's
+TargetName is reachable over SCION at each listed address. The listed
+addresses are equivalent; their order carries no preference, and
+duplicates have no effect. Clients <span class="bcp14">SHOULD</span> pick addresses to use in a
+random order, as for "ipv4hint" and "ipv6hint".<a href="#section-3.3-2" class="pilcrow">¶</a></p>
+<p id="section-3.3-3">Unlike "ipv4hint" and "ipv6hint", the value is not a hint: clients use
+the listed addresses directly. This document does not specify how
+clients order connection attempts to SCION addresses relative to IP
+addresses.<a href="#section-3.3-3" class="pilcrow">¶</a></p>
+<p id="section-3.3-4">The other SvcParams of the record apply to connections to the listed
+SCION addresses as they apply to IP connections to the endpoint. In
+particular:<a href="#section-3.3-4" class="pilcrow">¶</a></p>
+<ul class="normal">
+<li class="normal" id="section-3.3-5.1">
+            <p id="section-3.3-5.1.1">"port" gives the transport port at the SCION host address. If it is
+absent, the port is determined as for IP (Section 7.2 of <span>[<a href="#RFC9460" class="cite xref">RFC9460</a>]</span>).<a href="#section-3.3-5.1.1" class="pilcrow">¶</a></p>
+</li>
+          <li class="normal" id="section-3.3-5.2">
+            <p id="section-3.3-5.2.1">"alpn" and "no-default-alpn" determine the SVCB ALPN set for
+connections to the SCION addresses exactly as for IP connections
+(Section 7.1 of <span>[<a href="#RFC9460" class="cite xref">RFC9460</a>]</span>). A protocol that runs over TCP uses
+TCP/SCION, and one that runs over UDP uses UDP/SCION (SCION protocol
+numbers 6 and 17, Appendix A of <span>[<a href="#I-D.dekater-scion-dataplane" class="cite xref">I-D.dekater-scion-dataplane</a>]</span>). A
+client that cannot use the required transport over SCION does not use
+the SCION addresses for that protocol.<a href="#section-3.3-5.2.1" class="pilcrow">¶</a></p>
+</li>
+          <li class="normal" id="section-3.3-5.3">
+            <p id="section-3.3-5.3.1">"ech" applies to TLS handshakes over SCION.<a href="#section-3.3-5.3.1" class="pilcrow">¶</a></p>
+</li>
+        </ul>
+<p id="section-3.3-6">A client <span class="bcp14">MUST</span> authenticate the server of a connection to a SCION
+address as it would over IP, with the same server name and certificate
+validation.<a href="#section-3.3-6" class="pilcrow">¶</a></p>
+<p id="section-3.3-7">An IPv4-mapped host address denotes a SCION IPv4 host address, which a
+client <span class="bcp14">MUST</span> use as a 4-octet host address in the SCION header (address
+type 0, length 0; Section 2.1.2 of <span>[<a href="#I-D.dekater-scion-dataplane" class="cite xref">I-D.dekater-scion-dataplane</a>]</span>).
+Any other value denotes a 16-octet IPv6 host address (address type 0,
+length 3). The encoding therefore cannot express IPv6 host addresses
+that are themselves IPv4-mapped.<a href="#section-3.3-7" class="pilcrow">¶</a></p>
+<p id="section-3.3-8">A client <span class="bcp14">MUST NOT</span> use the host address of a SCION address as an IP
+address of the endpoint. IP addresses come from A and AAAA records or
+from "ipv4hint" and "ipv6hint".<a href="#section-3.3-8" class="pilcrow">¶</a></p>
+<div id="unusable">
+<section id="section-3.3.1">
+          <h4 id="name-unusable-addresses">
+<a href="#section-3.3.1" class="section-number selfRef">3.3.1. </a><a href="#name-unusable-addresses" class="section-name selfRef">Unusable Addresses</a>
+          </h4>
+<p id="section-3.3.1-1">A SCION address is unusable if its ISD number is 0 or its AS number is
+0 (wildcards, Sections 1.5.1 and 1.5.2.1 of
+<span>[<a href="#I-D.dekater-scion-controlplane" class="cite xref">I-D.dekater-scion-controlplane</a>]</span>), if its AS number is ffff:ffff:ffff
+(reserved, Section 1.5.2.2 of <span>[<a href="#I-D.dekater-scion-controlplane" class="cite xref">I-D.dekater-scion-controlplane</a>]</span>), or
+if its host address is unspecified (0.0.0.0 or ::) or multicast
+(224.0.0.0/4, or ff00::/8 per Section 2.7 of <span>[<a href="#RFC4291" class="cite xref">RFC4291</a>]</span>).<a href="#section-3.3.1-1" class="pilcrow">¶</a></p>
+<p id="section-3.3.1-2">Operators <span class="bcp14">MUST NOT</span> publish unusable addresses. A client <span class="bcp14">MUST</span> ignore
+unusable addresses and <span class="bcp14">MAY</span> use the others in the value. If no address
+remains, the client <span class="bcp14">MUST</span> proceed as if the key were absent; if the key
+is mandatory, the record is incompatible (<a href="#mandatory" class="auto internal xref">Section 3.3.2</a>).<a href="#section-3.3.1-2" class="pilcrow">¶</a></p>
+<p id="section-3.3.1-3">ISD numbers 16-63 and AS numbers ffaa:0:0 to ffaa:ff:ffff are reserved
+for private use (Sections 1.5.1 and 1.5.2.2 of
+<span>[<a href="#I-D.dekater-scion-controlplane" class="cite xref">I-D.dekater-scion-controlplane</a>]</span>). Operators <span class="bcp14">SHOULD NOT</span> publish
+addresses from these ranges in zones intended for use on the Internet.<a href="#section-3.3.1-3" class="pilcrow">¶</a></p>
+</section>
+</div>
+<div id="mandatory">
+<section id="section-3.3.2">
+          <h4 id="name-the-mandatory-key">
+<a href="#section-3.3.2" class="section-number selfRef">3.3.2. </a><a href="#name-the-mandatory-key" class="section-name selfRef">The "mandatory" Key</a>
+          </h4>
+<p id="section-3.3.2-1">When "scion" is listed in "mandatory", the record is compatible (Section
+8 of <span>[<a href="#RFC9460" class="cite xref">RFC9460</a>]</span>) for a client only if it implements the key, at least
+one listed address is usable (<a href="#unusable" class="auto internal xref">Section 3.3.1</a>), and the client has SCION
+connectivity; otherwise the client ignores the record. A path lookup or
+connection attempt that fails later does not make the record
+incompatible.
+<a href="#scion-only" class="auto internal xref">Section 4.1</a> gives guidance for operators.<a href="#section-3.3.2-1" class="pilcrow">¶</a></p>
+</section>
+</div>
+</section>
+</div>
+</section>
+</div>
+<div id="ops">
+<section id="section-4">
+      <h2 id="name-operational-considerations">
+<a href="#section-4" class="section-number selfRef">4. </a><a href="#name-operational-considerations" class="section-name selfRef">Operational Considerations</a>
+      </h2>
+<div id="scion-only">
+<section id="section-4.1">
+        <h3 id="name-endpoints-reachable-only-ov">
+<a href="#section-4.1" class="section-number selfRef">4.1. </a><a href="#name-endpoints-reachable-only-ov" class="section-name selfRef">Endpoints Reachable Only over SCION</a>
+        </h3>
+<p id="section-4.1-1">For an endpoint reachable only over SCION, operators <span class="bcp14">SHOULD</span> list
+"scion" in "mandatory" and publish no A or AAAA records for its
+TargetName. For an endpoint also reachable over IP, operators <span class="bcp14">SHOULD NOT</span>
+list "scion" in "mandatory", because clients that do not implement the
+key would discard the record. In the following example, clients that
+can use SCION use the first record and other clients the second, over
+IP:<a href="#section-4.1-1" class="pilcrow">¶</a></p>
+<div class="lang-dns-rr sourcecode" id="section-4.1-2">
+<pre>
+example.com.  3600 IN HTTPS 1 sc.example.com. (
+                       mandatory=scion alpn=h3
+                       scion=1-ff00:0:110_192.0.2.10 )
+example.com.  3600 IN HTTPS 2 . alpn=h3,h2
+example.com.  3600 IN A     198.51.100.1
+example.com.  3600 IN AAAA  2001:db8::1
+</pre><a href="#section-4.1-2" class="pilcrow">¶</a>
+</div>
+</section>
+</div>
+<div id="codepoint-used-before-assignment">
+<section id="section-4.2">
+        <h3 id="name-codepoint-used-before-assig">
+<a href="#section-4.2" class="section-number selfRef">4.2. </a><a href="#name-codepoint-used-before-assig" class="section-name selfRef">Codepoint Used Before Assignment</a>
+        </h3>
+<p id="section-4.2-1">Prototype implementations used the Private Use value 65280 for this key.
+Clients <span class="bcp14">SHOULD NOT</span> interpret 65280 as "scion" unless configured to do so.<a href="#section-4.2-1" class="pilcrow">¶</a></p>
+</section>
+</div>
+</section>
+</div>
+<div id="security">
+<section id="section-5">
+      <h2 id="name-security-considerations">
+<a href="#section-5" class="section-number selfRef">5. </a><a href="#name-security-considerations" class="section-name selfRef">Security Considerations</a>
+      </h2>
+<p id="section-5-1">The security considerations of <span>[<a href="#RFC9460" class="cite xref">RFC9460</a>]</span> apply. The security of the
+SCION control and data planes is specified in
+<span>[<a href="#I-D.dekater-scion-controlplane" class="cite xref">I-D.dekater-scion-controlplane</a>]</span> and <span>[<a href="#I-D.dekater-scion-dataplane" class="cite xref">I-D.dekater-scion-dataplane</a>]</span>.<a href="#section-5-1" class="pilcrow">¶</a></p>
+<div id="endpoint-authentication">
+<section id="section-5.1">
+        <h3 id="name-endpoint-authentication">
+<a href="#section-5.1" class="section-number selfRef">5.1. </a><a href="#name-endpoint-authentication" class="section-name selfRef">Endpoint Authentication</a>
+        </h3>
+<p id="section-5.1-1">An attacker that can modify DNS answers can already redirect clients by
+changing A, AAAA, or SVCB data, and clients rely on endpoint
+authentication to detect such redirection (Section 12 of <span>[<a href="#RFC9460" class="cite xref">RFC9460</a>]</span>).
+A forged "scion" value also lets the attacker choose the destination
+ISD and AS, and with them the paths available to the client. SCION path
+authorization validates the path, not that the host serves the
+requested name; it does not replace endpoint authentication
+(<a href="#semantics" class="auto internal xref">Section 3.3</a>).<a href="#section-5.1-1" class="pilcrow">¶</a></p>
+<p id="section-5.1-2">Because clients use the value directly rather than as a hint, no A or
+AAAA lookup can confirm it. The DNSSEC validation policy of Section 3.1
+of <span>[<a href="#RFC9460" class="cite xref">RFC9460</a>]</span> applies to it as to the rest of the record <span>[<a href="#RFC9364" class="cite xref">RFC9364</a>]</span>.<a href="#section-5.1-2" class="pilcrow">¶</a></p>
+</section>
+</div>
+<div id="internal-targets">
+<section id="section-5.2">
+        <h3 id="name-internal-targets">
+<a href="#section-5.2" class="section-number selfRef">5.2. </a><a href="#name-internal-targets" class="section-name selfRef">Internal Targets</a>
+        </h3>
+<p id="section-5.2-1">A "scion" value can name any AS, including the client's own, and any
+host within it. This is the SCION form of the attack on local-network
+addresses described in Section 12 of <span>[<a href="#RFC9460" class="cite xref">RFC9460</a>]</span>. Host addresses are
+interpreted only within their AS and are often private-use IP
+addresses, so a client cannot identify internal targets by host address
+alone. Clients that restrict connections to local-network IP addresses
+<span class="bcp14">SHOULD</span> apply the same policy to SCION addresses in their own AS and in
+private-use ISDs and ASes.<a href="#section-5.2-1" class="pilcrow">¶</a></p>
+</section>
+</div>
+<div id="removal-of-the-key">
+<section id="section-5.3">
+        <h3 id="name-removal-of-the-key">
+<a href="#section-5.3" class="section-number selfRef">5.3. </a><a href="#name-removal-of-the-key" class="section-name selfRef">Removal of the Key</a>
+        </h3>
+<p id="section-5.3-1">An attacker that removes the "scion" key or the record causes clients
+to connect over IP instead. DNSSEC detects modification of a signed
+record; blocking of the response is addressed by Section 3.1 of
+<span>[<a href="#RFC9460" class="cite xref">RFC9460</a>]</span>. Whether a client treats missing SCION addresses as a
+failure is a local policy matter.<a href="#section-5.3-1" class="pilcrow">¶</a></p>
+</section>
+</div>
+<div id="resource-consumption">
+<section id="section-5.4">
+        <h3 id="name-resource-consumption">
+<a href="#section-5.4" class="section-number selfRef">5.4. </a><a href="#name-resource-consumption" class="section-name selfRef">Resource Consumption</a>
+        </h3>
+<p id="section-5.4-1">Each distinct destination ISD and AS a client uses can trigger path
+lookups, which load the client's control service and, for uncached
+paths, those of core ASes in the client's ISD and in the destination
+ISD. Clients <span class="bcp14">SHOULD</span> limit the number of distinct destination ASes for
+which they look up paths when connecting to a service.<a href="#section-5.4-1" class="pilcrow">¶</a></p>
+</section>
+</div>
+</section>
+</div>
+<div id="privacy-considerations">
+<section id="section-6">
+      <h2 id="name-privacy-considerations">
+<a href="#section-6" class="section-number selfRef">6. </a><a href="#name-privacy-considerations" class="section-name selfRef">Privacy Considerations</a>
+      </h2>
+<p id="section-6-1">A path lookup reveals the destination ISD and AS to the client's SCION
+control service. Unless the answer is cached, that service may query
+core ASes in its own ISD, which learn the querying AS and the
+destination ISD, and core ASes in the destination ISD, which learn the
+destination AS and the querying AS (Section 4.1 of
+<span>[<a href="#I-D.dekater-scion-controlplane" class="cite xref">I-D.dekater-scion-controlplane</a>]</span>). These parties can differ from the
+client's IP access provider.<a href="#section-6-1" class="pilcrow">¶</a></p>
+</section>
+</div>
+<div id="iana">
+<section id="section-7">
+      <h2 id="name-iana-considerations">
+<a href="#section-7" class="section-number selfRef">7. </a><a href="#name-iana-considerations" class="section-name selfRef">IANA Considerations</a>
+      </h2>
+<p id="section-7-1">IANA is requested to add the following entry to the "DNS SVCB Service
+Parameter Keys (SvcParamKeys)" registry in the "DNS Service Bindings
+(SVCB)" registry group <span>[<a href="#RFC9460" class="cite xref">RFC9460</a>]</span>:<a href="#section-7-1" class="pilcrow">¶</a></p>
+<span class="break"></span><dl class="dlParallel" id="section-7-2">
+        <dt id="section-7-2.1">Number:</dt>
+        <dd style="margin-left: 1.5em" id="section-7-2.2">
+          <p id="section-7-2.2.1">TBD (13 suggested)<a href="#section-7-2.2.1" class="pilcrow">¶</a></p>
+</dd>
+        <dd class="break"></dd>
+<dt id="section-7-2.3">Name:</dt>
+        <dd style="margin-left: 1.5em" id="section-7-2.4">
+          <p id="section-7-2.4.1">scion<a href="#section-7-2.4.1" class="pilcrow">¶</a></p>
+</dd>
+        <dd class="break"></dd>
+<dt id="section-7-2.5">Meaning:</dt>
+        <dd style="margin-left: 1.5em" id="section-7-2.6">
+          <p id="section-7-2.6.1">SCION addresses<a href="#section-7-2.6.1" class="pilcrow">¶</a></p>
+</dd>
+        <dd class="break"></dd>
+<dt id="section-7-2.7">Change Controller:</dt>
+        <dd style="margin-left: 1.5em" id="section-7-2.8">
+          <p id="section-7-2.8.1">Tony John (tony.john@ovgu.de)<a href="#section-7-2.8.1" class="pilcrow">¶</a></p>
+</dd>
+        <dd class="break"></dd>
+<dt id="section-7-2.9">Reference:</dt>
+        <dd style="margin-left: 1.5em" id="section-7-2.10">
+          <p id="section-7-2.10.1">This document (<a href="#key" class="auto internal xref">Section 3</a>)<a href="#section-7-2.10.1" class="pilcrow">¶</a></p>
+</dd>
+      <dd class="break"></dd>
+</dl>
+<p id="section-7-3"><a href="#presentation" class="auto internal xref">Section 3.2</a> and <a href="#wire" class="auto internal xref">Section 3.1</a> specify the presentation-to-wire
+conversion required by Section 14.3.1 of <span>[<a href="#RFC9460" class="cite xref">RFC9460</a>]</span>;
+<a href="#test-vectors" class="auto internal xref">Appendix B</a> provides test vectors.<a href="#section-7-3" class="pilcrow">¶</a></p>
+<p id="section-7-4">(RFC Editor: replace TBD with the assigned value throughout and remove
+this note.)<a href="#section-7-4" class="pilcrow">¶</a></p>
+</section>
+</div>
+<div id="sec-combined-references">
+<section id="section-8">
+      <h2 id="name-references">
+<a href="#section-8" class="section-number selfRef">8. </a><a href="#name-references" class="section-name selfRef">References</a>
+      </h2>
+<div id="sec-normative-references">
+<section id="section-8.1">
+        <h3 id="name-normative-references">
+<a href="#section-8.1" class="section-number selfRef">8.1. </a><a href="#name-normative-references" class="section-name selfRef">Normative References</a>
+        </h3>
+<dl class="references">
+<dt id="I-D.dekater-scion-controlplane">[I-D.dekater-scion-controlplane]</dt>
+        <dd>
+<span class="refAuthor">de Kater, C.</span>, <span class="refAuthor">Rustignoli, N.</span>, and <span class="refAuthor">S. Hitz</span>, <span class="refTitle">"SCION Control Plane"</span>, <span class="refContent">Work in Progress</span>, <span class="seriesInfo">Internet-Draft, draft-dekater-scion-controlplane-18</span>, <time datetime="2026-04-30" class="refDate">30 April 2026</time>, <span>&lt;<a href="https://datatracker.ietf.org/doc/html/draft-dekater-scion-controlplane-18">https://datatracker.ietf.org/doc/html/draft-dekater-scion-controlplane-18</a>&gt;</span>. </dd>
+<dd class="break"></dd>
+<dt id="I-D.dekater-scion-dataplane">[I-D.dekater-scion-dataplane]</dt>
+        <dd>
+<span class="refAuthor">de Kater, C.</span>, <span class="refAuthor">Rustignoli, N.</span>, <span class="refAuthor">Hugly, J.</span>, and <span class="refAuthor">S. Hitz</span>, <span class="refTitle">"SCION Data Plane"</span>, <span class="refContent">Work in Progress</span>, <span class="seriesInfo">Internet-Draft, draft-dekater-scion-dataplane-15</span>, <time datetime="2026-06-24" class="refDate">24 June 2026</time>, <span>&lt;<a href="https://datatracker.ietf.org/doc/html/draft-dekater-scion-dataplane-15">https://datatracker.ietf.org/doc/html/draft-dekater-scion-dataplane-15</a>&gt;</span>. </dd>
+<dd class="break"></dd>
+<dt id="RFC2119">[RFC2119]</dt>
+        <dd>
+<span class="refAuthor">Bradner, S.</span>, <span class="refTitle">"Key words for use in RFCs to Indicate Requirement Levels"</span>, <span class="seriesInfo">BCP 14</span>, <span class="seriesInfo">RFC 2119</span>, <span class="seriesInfo">DOI 10.17487/RFC2119</span>, <time datetime="1997-03" class="refDate">March 1997</time>, <span>&lt;<a href="https://www.rfc-editor.org/rfc/rfc2119">https://www.rfc-editor.org/rfc/rfc2119</a>&gt;</span>. </dd>
+<dd class="break"></dd>
+<dt id="RFC3986">[RFC3986]</dt>
+        <dd>
+<span class="refAuthor">Berners-Lee, T.</span>, <span class="refAuthor">Fielding, R.</span>, and <span class="refAuthor">L. Masinter</span>, <span class="refTitle">"Uniform Resource Identifier (URI): Generic Syntax"</span>, <span class="seriesInfo">STD 66</span>, <span class="seriesInfo">RFC 3986</span>, <span class="seriesInfo">DOI 10.17487/RFC3986</span>, <time datetime="2005-01" class="refDate">January 2005</time>, <span>&lt;<a href="https://www.rfc-editor.org/rfc/rfc3986">https://www.rfc-editor.org/rfc/rfc3986</a>&gt;</span>. </dd>
+<dd class="break"></dd>
+<dt id="RFC4291">[RFC4291]</dt>
+        <dd>
+<span class="refAuthor">Hinden, R.</span> and <span class="refAuthor">S. Deering</span>, <span class="refTitle">"IP Version 6 Addressing Architecture"</span>, <span class="seriesInfo">RFC 4291</span>, <span class="seriesInfo">DOI 10.17487/RFC4291</span>, <time datetime="2006-02" class="refDate">February 2006</time>, <span>&lt;<a href="https://www.rfc-editor.org/rfc/rfc4291">https://www.rfc-editor.org/rfc/rfc4291</a>&gt;</span>. </dd>
+<dd class="break"></dd>
+<dt id="RFC5234">[RFC5234]</dt>
+        <dd>
+<span class="refAuthor">Crocker, D., Ed.</span> and <span class="refAuthor">P. Overell</span>, <span class="refTitle">"Augmented BNF for Syntax Specifications: ABNF"</span>, <span class="seriesInfo">STD 68</span>, <span class="seriesInfo">RFC 5234</span>, <span class="seriesInfo">DOI 10.17487/RFC5234</span>, <time datetime="2008-01" class="refDate">January 2008</time>, <span>&lt;<a href="https://www.rfc-editor.org/rfc/rfc5234">https://www.rfc-editor.org/rfc/rfc5234</a>&gt;</span>. </dd>
+<dd class="break"></dd>
+<dt id="RFC5952">[RFC5952]</dt>
+        <dd>
+<span class="refAuthor">Kawamura, S.</span> and <span class="refAuthor">M. Kawashima</span>, <span class="refTitle">"A Recommendation for IPv6 Address Text Representation"</span>, <span class="seriesInfo">RFC 5952</span>, <span class="seriesInfo">DOI 10.17487/RFC5952</span>, <time datetime="2010-08" class="refDate">August 2010</time>, <span>&lt;<a href="https://www.rfc-editor.org/rfc/rfc5952">https://www.rfc-editor.org/rfc/rfc5952</a>&gt;</span>. </dd>
+<dd class="break"></dd>
+<dt id="RFC8174">[RFC8174]</dt>
+        <dd>
+<span class="refAuthor">Leiba, B.</span>, <span class="refTitle">"Ambiguity of Uppercase vs Lowercase in RFC 2119 Key Words"</span>, <span class="seriesInfo">BCP 14</span>, <span class="seriesInfo">RFC 8174</span>, <span class="seriesInfo">DOI 10.17487/RFC8174</span>, <time datetime="2017-05" class="refDate">May 2017</time>, <span>&lt;<a href="https://www.rfc-editor.org/rfc/rfc8174">https://www.rfc-editor.org/rfc/rfc8174</a>&gt;</span>. </dd>
+<dd class="break"></dd>
+<dt id="RFC9460">[RFC9460]</dt>
+      <dd>
+<span class="refAuthor">Schwartz, B.</span>, <span class="refAuthor">Bishop, M.</span>, and <span class="refAuthor">E. Nygren</span>, <span class="refTitle">"Service Binding and Parameter Specification via the DNS (SVCB and HTTPS Resource Records)"</span>, <span class="seriesInfo">RFC 9460</span>, <span class="seriesInfo">DOI 10.17487/RFC9460</span>, <time datetime="2023-11" class="refDate">November 2023</time>, <span>&lt;<a href="https://www.rfc-editor.org/rfc/rfc9460">https://www.rfc-editor.org/rfc/rfc9460</a>&gt;</span>. </dd>
+<dd class="break"></dd>
+</dl>
+</section>
+</div>
+<div id="sec-informative-references">
+<section id="section-8.2">
+        <h3 id="name-informative-references">
+<a href="#section-8.2" class="section-number selfRef">8.2. </a><a href="#name-informative-references" class="section-name selfRef">Informative References</a>
+        </h3>
+<dl class="references">
+<dt id="DNS-SCION-SVCB">[DNS-SCION-SVCB]</dt>
+        <dd>
+<span class="refAuthor">netsys-lab</span>, <span class="refTitle">"dns-scion-svcb: miekg/dns with the scion SvcParamKey"</span>, <time datetime="2026" class="refDate">2026</time>, <span>&lt;<a href="https://github.com/netsys-lab/dns-scion-svcb/tree/69d4ec790b666da7ede7cbd088fdd059ad7b4d7e">https://github.com/netsys-lab/dns-scion-svcb/tree/69d4ec790b666da7ede7cbd088fdd059ad7b4d7e</a>&gt;</span>. </dd>
+<dd class="break"></dd>
+<dt id="I-D.meynell-panrg-scion-research-questions">[I-D.meynell-panrg-scion-research-questions]</dt>
+        <dd>
+<span class="refAuthor">Meynell, K.</span>, <span class="refAuthor">de los Galanes, J. A.</span>, <span class="refAuthor">Zäschke, T.</span>, and <span class="refAuthor">N. Rustignoli</span>, <span class="refTitle">"SCION Research Questions"</span>, <span class="refContent">Work in Progress</span>, <span class="seriesInfo">Internet-Draft, draft-meynell-panrg-scion-research-questions-01</span>, <time datetime="2024-07-24" class="refDate">24 July 2024</time>, <span>&lt;<a href="https://datatracker.ietf.org/doc/html/draft-meynell-panrg-scion-research-questions-01">https://datatracker.ietf.org/doc/html/draft-meynell-panrg-scion-research-questions-01</a>&gt;</span>. </dd>
+<dd class="break"></dd>
+<dt id="RFC5398">[RFC5398]</dt>
+        <dd>
+<span class="refAuthor">Huston, G.</span>, <span class="refTitle">"Autonomous System (AS) Number Reservation for Documentation Use"</span>, <span class="seriesInfo">RFC 5398</span>, <span class="seriesInfo">DOI 10.17487/RFC5398</span>, <time datetime="2008-12" class="refDate">December 2008</time>, <span>&lt;<a href="https://www.rfc-editor.org/rfc/rfc5398">https://www.rfc-editor.org/rfc/rfc5398</a>&gt;</span>. </dd>
+<dd class="break"></dd>
+<dt id="RFC7942">[RFC7942]</dt>
+        <dd>
+<span class="refAuthor">Sheffer, Y.</span> and <span class="refAuthor">A. Farrel</span>, <span class="refTitle">"Improving Awareness of Running Code: The Implementation Status Section"</span>, <span class="seriesInfo">BCP 205</span>, <span class="seriesInfo">RFC 7942</span>, <span class="seriesInfo">DOI 10.17487/RFC7942</span>, <time datetime="2016-07" class="refDate">July 2016</time>, <span>&lt;<a href="https://www.rfc-editor.org/rfc/rfc7942">https://www.rfc-editor.org/rfc/rfc7942</a>&gt;</span>. </dd>
+<dd class="break"></dd>
+<dt id="RFC9217">[RFC9217]</dt>
+        <dd>
+<span class="refAuthor">Trammell, B.</span>, <span class="refTitle">"Current Open Questions in Path-Aware Networking"</span>, <span class="seriesInfo">RFC 9217</span>, <span class="seriesInfo">DOI 10.17487/RFC9217</span>, <time datetime="2022-03" class="refDate">March 2022</time>, <span>&lt;<a href="https://www.rfc-editor.org/rfc/rfc9217">https://www.rfc-editor.org/rfc/rfc9217</a>&gt;</span>. </dd>
+<dd class="break"></dd>
+<dt id="RFC9364">[RFC9364]</dt>
+        <dd>
+<span class="refAuthor">Hoffman, P.</span>, <span class="refTitle">"DNS Security Extensions (DNSSEC)"</span>, <span class="seriesInfo">BCP 237</span>, <span class="seriesInfo">RFC 9364</span>, <span class="seriesInfo">DOI 10.17487/RFC9364</span>, <time datetime="2023-02" class="refDate">February 2023</time>, <span>&lt;<a href="https://www.rfc-editor.org/rfc/rfc9364">https://www.rfc-editor.org/rfc/rfc9364</a>&gt;</span>. </dd>
+<dd class="break"></dd>
+<dt id="RFC9848">[RFC9848]</dt>
+      <dd>
+<span class="refAuthor">Schwartz, B.</span>, <span class="refAuthor">Bishop, M.</span>, and <span class="refAuthor">E. Nygren</span>, <span class="refTitle">"Bootstrapping TLS Encrypted ClientHello with DNS Service Bindings"</span>, <span class="seriesInfo">RFC 9848</span>, <span class="seriesInfo">DOI 10.17487/RFC9848</span>, <time datetime="2026-03" class="refDate">March 2026</time>, <span>&lt;<a href="https://www.rfc-editor.org/rfc/rfc9848">https://www.rfc-editor.org/rfc/rfc9848</a>&gt;</span>. </dd>
+<dd class="break"></dd>
+</dl>
+</section>
+</div>
+</section>
+</div>
+<div id="examples">
+<section id="appendix-A">
+      <h2 id="name-examples">
+<a href="#appendix-A" class="section-number selfRef">Appendix A. </a><a href="#name-examples" class="section-name selfRef">Examples</a>
+      </h2>
+<p id="appendix-A-1">The examples use ISD and AS numbers reserved for documentation (ISDs
+1-15 and AS numbers ff00:0:0 to ff00:0:ffff, Sections 1.5.1 and 1.5.2.2
+of <span>[<a href="#I-D.dekater-scion-controlplane" class="cite xref">I-D.dekater-scion-controlplane</a>]</span>), except that test vectors use AS
+64496 from <span>[<a href="#RFC5398" class="cite xref">RFC5398</a>]</span> and values at 2^32 to show the decimal AS form and
+canonical rendering.<a href="#appendix-A-1" class="pilcrow">¶</a></p>
+<p id="appendix-A-2">An HTTPS service reachable over IPv4, IPv6, and SCION:<a href="#appendix-A-2" class="pilcrow">¶</a></p>
+<div class="lang-dns-rr sourcecode" id="appendix-A-3">
+<pre>
+$ORIGIN example.com.
+web  3600 IN A      192.0.2.80
+web  3600 IN AAAA   2001:db8::80
+web  3600 IN HTTPS  1 . alpn=h3,h2 scion=1-ff00:0:110_192.0.2.81
+</pre><a href="#appendix-A-3" class="pilcrow">¶</a>
+</div>
+</section>
+</div>
+<div id="test-vectors">
+<section id="appendix-B">
+      <h2 id="name-test-vectors">
+<a href="#appendix-B" class="section-number selfRef">Appendix B. </a><a href="#name-test-vectors" class="section-name selfRef">Test Vectors</a>
+      </h2>
+<div id="wire-vectors">
+<section id="appendix-B.1">
+        <h3 id="name-wire-format-2">
+<a href="#appendix-B.1" class="section-number selfRef">B.1. </a><a href="#name-wire-format-2" class="section-name selfRef">Wire Format</a>
+        </h3>
+<p id="appendix-B.1-1">Each vector gives a presentation value and the SvcParamValue in
+hexadecimal, one 24-octet block per line, split into ISD, AS, and host.
+Whitespace is for readability only.<a href="#appendix-B.1-1" class="pilcrow">¶</a></p>
+<div class="alignLeft art-text artwork" id="appendix-B.1-2">
+<pre>
+1. 1-ff00:0:110_192.0.2.1
+   0001 ff0000000110 00000000000000000000ffffc0000201
+
+2. 1-ff00:0:110_2001:db8::1
+   0001 ff0000000110 20010db8000000000000000000000001
+
+3. 15-64496_198.51.100.7
+   000f 00000000fbf0 00000000000000000000ffffc6336407
+
+4. 1-ff00:0:110_192.0.2.1,2-ff00:0:220_2001:db8:220::7
+   0001 ff0000000110 00000000000000000000ffffc0000201
+   0002 ff0000000220 20010db8022000000000000000000007
+</pre><a href="#appendix-B.1-2" class="pilcrow">¶</a>
+</div>
+</section>
+</div>
+<div id="rendering-vectors">
+<section id="appendix-B.2">
+        <h3 id="name-canonical-rendering-2">
+<a href="#appendix-B.2" class="section-number selfRef">B.2. </a><a href="#name-canonical-rendering-2" class="section-name selfRef">Canonical Rendering</a>
+        </h3>
+<p id="appendix-B.2-1">Each line gives a presentation value and the canonical rendering of its
+wire value (<a href="#rendering" class="auto internal xref">Section 3.2.1</a>).<a href="#appendix-B.2-1" class="pilcrow">¶</a></p>
+<div class="alignLeft art-text artwork" id="appendix-B.2-2">
+<pre>
+1-FF00:0000:0110_2001:DB8:0:0::1  -&gt;  1-ff00:0:110_2001:db8::1
+01-0:0:fbf0_::ffff:192.0.2.1      -&gt;  1-64496_192.0.2.1
+1-0:ffff:ffff_192.0.2.1           -&gt;  1-4294967295_192.0.2.1
+1-1:0:0_192.0.2.1                 -&gt;  1-1:0:0_192.0.2.1
+1-ff00:0:110_::c000:201           -&gt;  1-ff00:0:110_::c000:201
+</pre><a href="#appendix-B.2-2" class="pilcrow">¶</a>
+</div>
+</section>
+</div>
+<div id="invalid-vectors">
+<section id="appendix-B.3">
+        <h3 id="name-invalid-and-unusable-values">
+<a href="#appendix-B.3" class="section-number selfRef">B.3. </a><a href="#name-invalid-and-unusable-values" class="section-name selfRef">Invalid and Unusable Values</a>
+        </h3>
+<p id="appendix-B.3-1">Zone-file implementations <span class="bcp14">SHOULD</span> reject a value with an unusable
+address; clients ignore the address (<a href="#presentation" class="auto internal xref">Section 3.2</a>, <a href="#unusable" class="auto internal xref">Section 3.3.1</a>).<a href="#appendix-B.3-1" class="pilcrow">¶</a></p>
+<div class="alignLeft art-text artwork" id="appendix-B.3-2">
+<pre>
+Presentation: 1-ff00:0:110,192.0.2.1
+Result:       invalid: "," separates list items
+
+Presentation: 1-ff00:0:110\_192.0.2.1
+Result:       invalid: escape sequence
+
+Presentation: 1-4294967296_192.0.2.1
+Result:       invalid: decimal AS number not below 2^32
+
+Presentation: 70000-ff00:0:110_192.0.2.1
+Result:       invalid: ISD number above 65535
+
+Presentation: 1-ff00:0:01100_192.0.2.1
+Result:       invalid: hexadecimal group longer than 4 digits
+
+Presentation: scion (no value)
+Result:       invalid: empty value
+
+Presentation: 0-ff00:0:110_192.0.2.1
+Result:       unusable: wildcard ISD number
+
+Presentation: 1-0_192.0.2.1
+Result:       unusable: wildcard AS number
+
+Presentation: 1-ffff:ffff:ffff_192.0.2.1
+Result:       unusable: reserved AS number
+
+Presentation: 1-ff00:0:110_::
+Result:       unusable: unspecified host address
+
+Wire:         SvcParamValue of 0, 23, or 25 octets
+Result:       malformed: the RRset is rejected
+</pre><a href="#appendix-B.3-2" class="pilcrow">¶</a>
+</div>
+</section>
+</div>
+</section>
+</div>
+<div id="design-rationale">
+<section id="appendix-C">
+      <h2 id="name-design-rationale">
+<a href="#appendix-C" class="section-number selfRef">Appendix C. </a><a href="#name-design-rationale" class="section-name selfRef">Design Rationale</a>
+      </h2>
+<span class="break"></span><dl class="dlParallel" id="appendix-C-1">
+        <dt id="appendix-C-1.1">SvcParamKey rather than a new RR type:</dt>
+        <dd style="margin-left: 1.5em" id="appendix-C-1.2">
+          <p id="appendix-C-1.2.1">A new RR type would need an additional query and support in DNS
+software before deployment. A SvcParamKey needs only registration and
+is ignored by software that does not implement it.<a href="#appendix-C-1.2.1" class="pilcrow">¶</a></p>
+</dd>
+        <dd class="break"></dd>
+<dt id="appendix-C-1.3">Fixed-length binary encoding:</dt>
+        <dd style="margin-left: 1.5em" id="appendix-C-1.4">
+          <p id="appendix-C-1.4.1">Carrying every host address in 16 octets costs 12 octets per IPv4
+host address, in exchange for exactly one encoding per address and
+comparison octet by octet, as with "ipv4hint" and "ipv6hint".<a href="#appendix-C-1.4.1" class="pilcrow">¶</a></p>
+</dd>
+      <dd class="break"></dd>
+</dl>
+</section>
+</div>
+<div id="implementation-status">
+<section id="appendix-D">
+      <h2 id="name-implementation-status">
+<a href="#appendix-D" class="section-number selfRef">Appendix D. </a><a href="#name-implementation-status" class="section-name selfRef">Implementation Status</a>
+      </h2>
+<p id="appendix-D-1">(RFC Editor: please remove this section, and the references cited only
+in it, before publication.)<a href="#appendix-D-1" class="pilcrow">¶</a></p>
+<p id="appendix-D-2">Implementation status as of November 2026 (<span>[<a href="#RFC7942" class="cite xref">RFC7942</a>]</span>):<a href="#appendix-D-2" class="pilcrow">¶</a></p>
+<span class="break"></span><dl class="dlParallel" id="appendix-D-3">
+        <dt id="appendix-D-3.1">dns-scion-svcb <span>[<a href="#DNS-SCION-SVCB" class="cite xref">DNS-SCION-SVCB</a>]</span>:</dt>
+        <dd style="margin-left: 1.5em" id="appendix-D-3.2">
+          <p id="appendix-D-3.2.1">A fork of the miekg/dns Go library that parses, serializes, and
+presents the key using the Private Use value 65280, deployed in a
+CoreDNS instance on a SCION testbed. It differs from this document in
+that it fails the whole DNS message on a malformed value. License:
+BSD-3-Clause. Contact: Tony John.<a href="#appendix-D-3.2.1" class="pilcrow">¶</a></p>
+</dd>
+      <dd class="break"></dd>
+</dl>
+</section>
+</div>
+<div id="acknowledgments">
+<section id="appendix-E">
+      <h2 id="name-acknowledgments">
+<a href="#name-acknowledgments" class="section-name selfRef">Acknowledgments</a>
+      </h2>
+<p id="appendix-E-1">The idea of a SCION SvcParamKey was first raised in
+<span>[<a href="#I-D.meynell-panrg-scion-research-questions" class="cite xref">I-D.meynell-panrg-scion-research-questions</a>]</span>. The authors thank the
+participants of the SCION research meetings and of the SCION Association
+Technical Committee for their feedback.<a href="#appendix-E-1" class="pilcrow">¶</a></p>
+</section>
+</div>
+<div id="authors-addresses">
+<section id="appendix-F">
+      <h2 id="name-authors-addresses">
+<a href="#name-authors-addresses" class="section-name selfRef">Authors' Addresses</a>
+      </h2>
+<address class="vcard">
+        <div dir="auto" class="left"><span class="fn nameRole">Tony John</span></div>
+<div dir="auto" class="left"><span class="org">OVGU Magdeburg</span></div>
+<div class="email">
+<span>Email:</span>
+<a href="mailto:tony.john@ovgu.de" class="email">tony.john@ovgu.de</a>
+</div>
+</address>
+<address class="vcard">
+        <div dir="auto" class="left"><span class="fn nameRole">Jelte van Bommel</span></div>
+<div dir="auto" class="left"><span class="org">ETH Zurich</span></div>
+<div class="email">
+<span>Email:</span>
+<a href="mailto:jelte.vanbommel@inf.ethz.ch" class="email">jelte.vanbommel@inf.ethz.ch</a>
+</div>
+</address>
+<address class="vcard">
+        <div dir="auto" class="left"><span class="fn nameRole">Tilmann Zäschke</span></div>
+<div dir="auto" class="left"><span class="org">ETH Zurich</span></div>
+<div class="email">
+<span>Email:</span>
+<a href="mailto:tilmann.zaeschke@inf.ethz.ch" class="email">tilmann.zaeschke@inf.ethz.ch</a>
+</div>
+</address>
+<address class="vcard">
+        <div dir="auto" class="left"><span class="fn nameRole">Lars-Christian Schulz</span></div>
+<div dir="auto" class="left"><span class="org">OVGU Magdeburg</span></div>
+<div class="email">
+<span>Email:</span>
+<a href="mailto:lschulz@ovgu.de" class="email">lschulz@ovgu.de</a>
+</div>
+</address>
+<address class="vcard">
+        <div dir="auto" class="left"><span class="fn nameRole">Nicola Rustignoli</span></div>
+<div dir="auto" class="left"><span class="org">SCION Association</span></div>
+<div class="email">
+<span>Email:</span>
+<a href="mailto:nic@scion.org" class="email">nic@scion.org</a>
+</div>
+</address>
+</section>
+</div>
+<script>const toc = document.getElementById("toc");
+toc.querySelector("h2").addEventListener("click", e => {
+  toc.classList.toggle("active");
+});
+toc.querySelector("nav").addEventListener("click", e => {
+  toc.classList.remove("active");
+});
+</script>
+</body>
+</html>
