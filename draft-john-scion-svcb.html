@@ -1058,7 +1058,7 @@ svg {
 </tr></thead>
 <tfoot><tr>
 <td class="left">John, et al.</td>
-<td class="center">Expires 16 May 2027</td>
+<td class="center">Expires 18 May 2027</td>
 <td class="right">[Page]</td>
 </tr></tfoot>
 </table>
@@ -1071,12 +1071,12 @@ svg {
 <dd class="internet-draft">draft-john-scion-svcb-latest</dd>
 <dt class="label-published">Published:</dt>
 <dd class="published">
-<time datetime="2026-11-12" class="published">12 November 2026</time>
+<time datetime="2026-11-14" class="published">14 November 2026</time>
     </dd>
 <dt class="label-intended-status">Intended Status:</dt>
 <dd class="intended-status">Informational</dd>
 <dt class="label-expires">Expires:</dt>
-<dd class="expires"><time datetime="2027-05-16">16 May 2027</time></dd>
+<dd class="expires"><time datetime="2027-05-18">18 May 2027</time></dd>
 <dt class="label-authors">Authors:</dt>
 <dd class="authors">
 <div class="author">
@@ -1142,7 +1142,7 @@ requests its registration with IANA.<a href="#section-abstract-1" class="pilcrow
         time. It is inappropriate to use Internet-Drafts as reference
         material or to cite them other than as "work in progress."<a href="#section-boilerplate.1-3" class="pilcrow">¶</a></p>
 <p id="section-boilerplate.1-4">
-        This Internet-Draft will expire on 16 May 2027.<a href="#section-boilerplate.1-4" class="pilcrow">¶</a></p>
+        This Internet-Draft will expire on 18 May 2027.<a href="#section-boilerplate.1-4" class="pilcrow">¶</a></p>
 </section>
 </div>
 <div id="copyright">
@@ -1290,7 +1290,7 @@ path-aware inter-domain network architecture <span>[<a href="#RFC9217" class="ci
 endpoint is identified by a SCION address, which consists of an
 Isolation Domain (ISD) number, a SCION Autonomous System (AS) number,
 and a host address.<a href="#section-1-1" class="pilcrow">¶</a></p>
-<p id="section-1-2">No standard way exists to publish SCION addresses in the DNS. Current
+<p id="section-1-2">No interoperable way exists to publish SCION addresses in the DNS. Current
 deployments use TXT records of the form "scion=ISD-AS,host" (Section
 3.3 of <span>[<a href="#I-D.meynell-panrg-scion-research-questions" class="cite xref">I-D.meynell-panrg-scion-research-questions</a>]</span>), which cannot be
 associated with
@@ -1318,24 +1318,28 @@ appear in all capitals, as shown here.<a href="#section-2-1" class="pilcrow">¶<
 <span>[<a href="#I-D.dekater-scion-controlplane" class="cite xref">I-D.dekater-scion-controlplane</a>]</span>).<a href="#section-2-3.2.1" class="pilcrow">¶</a></p>
 </dd>
         <dd class="break"></dd>
-<dt id="section-2-3.3">AS number:</dt>
+<dt id="section-2-3.3">SCION AS number:</dt>
         <dd style="margin-left: 1.5em" id="section-2-3.4">
-          <p id="section-2-3.4.1">A 48-bit number identifying a SCION Autonomous System (Section 1.5.2
-of <span>[<a href="#I-D.dekater-scion-controlplane" class="cite xref">I-D.dekater-scion-controlplane</a>]</span>).<a href="#section-2-3.4.1" class="pilcrow">¶</a></p>
+          <p id="section-2-3.4.1">A 48-bit number identifying a SCION Autonomous System (AS) (Section
+1.5.2 of <span>[<a href="#I-D.dekater-scion-controlplane" class="cite xref">I-D.dekater-scion-controlplane</a>]</span>). SCION AS numbers are
+distinct from BGP AS numbers, although some SCION ASes reuse their BGP
+AS number as their SCION AS number. In this document, "AS" and "AS
+number" always refer to a SCION AS and a SCION AS number.<a href="#section-2-3.4.1" class="pilcrow">¶</a></p>
 </dd>
         <dd class="break"></dd>
 <dt id="section-2-3.5">Host address:</dt>
         <dd style="margin-left: 1.5em" id="section-2-3.6">
           <p id="section-2-3.6.1">The address of an endpoint within its SCION AS, interpreted only
-within that AS. SCION carries IPv4 (4-octet), IPv6 (16-octet), and
-other host address types (Section 2.1.2 of
-<span>[<a href="#I-D.dekater-scion-dataplane" class="cite xref">I-D.dekater-scion-dataplane</a>]</span>); this document covers IPv4 and IPv6
-host addresses only.<a href="#section-2-3.6.1" class="pilcrow">¶</a></p>
+within that AS; the SCION specifications call it the endpoint address.
+SCION carries IPv4 (4-octet), IPv6 (16-octet), and other host address
+types (Section 2.1.2 of <span>[<a href="#I-D.dekater-scion-dataplane" class="cite xref">I-D.dekater-scion-dataplane</a>]</span>); this
+document covers IPv4 and IPv6 host addresses only.<a href="#section-2-3.6.1" class="pilcrow">¶</a></p>
 </dd>
         <dd class="break"></dd>
 <dt id="section-2-3.7">SCION address:</dt>
         <dd style="margin-left: 1.5em" id="section-2-3.8">
-          <p id="section-2-3.8.1">The combination of an ISD number, an AS number, and a host address.<a href="#section-2-3.8.1" class="pilcrow">¶</a></p>
+          <p id="section-2-3.8.1">The combination of an ISD number, a SCION AS number, and a host
+address (Section 1.5 of <span>[<a href="#I-D.dekater-scion-controlplane" class="cite xref">I-D.dekater-scion-controlplane</a>]</span>).<a href="#section-2-3.8.1" class="pilcrow">¶</a></p>
 </dd>
       <dd class="break"></dd>
 </dl>
@@ -1361,7 +1365,7 @@ holding one SCION address:<a href="#section-3.1-1" class="pilcrow">¶</a></p>
 +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 |          ISD number           |                               |
 +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+                               +
-|                           AS number                           |
+|                        SCION AS number                        |
 +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 |                                                               |
 +                                                               +
@@ -1382,7 +1386,7 @@ holding one SCION address:<a href="#section-3.1-1" class="pilcrow">¶</a></p>
             <p id="section-3.1-3.2.1">2 octets, in network byte order.<a href="#section-3.1-3.2.1" class="pilcrow">¶</a></p>
 </dd>
           <dd class="break"></dd>
-<dt id="section-3.1-3.3">AS number:</dt>
+<dt id="section-3.1-3.3">SCION AS number:</dt>
           <dd style="margin-left: 1.5em" id="section-3.1-3.4">
             <p id="section-3.1-3.4.1">6 octets, in network byte order.<a href="#section-3.1-3.4.1" class="pilcrow">¶</a></p>
 </dd>
@@ -1423,12 +1427,14 @@ as-hex        = 1*4HEXDIG ":" 1*4HEXDIG ":" 1*4HEXDIG
 host          = IPv4address / IPv6address
 </pre><a href="#section-3.2-2" class="pilcrow">¶</a>
 </div>
-<p id="section-3.2-3">The <code>isd</code> and <code>as-dec</code> values are decimal; leading zeros do not change
-the value. The <code>as-hex</code> form gives the AS number as three 16-bit groups
-in network byte order (Section 1.5.3.2 of
-<span>[<a href="#I-D.dekater-scion-controlplane" class="cite xref">I-D.dekater-scion-controlplane</a>]</span>). An IPv4 host address can be written
-in IPv4 form ("192.0.2.1") or in IPv4-mapped IPv6 form
-("::ffff:192.0.2.1"); both produce the same wire encoding.<a href="#section-3.2-3" class="pilcrow">¶</a></p>
+<p id="section-3.2-3">The part before the "_" is the "ISD-AS" text representation of the ISD
+number and SCION AS number (Section 1.5.3 of
+<span>[<a href="#I-D.dekater-scion-controlplane" class="cite xref">I-D.dekater-scion-controlplane</a>]</span>). The <code>isd</code> and <code>as-dec</code> values are
+decimal; leading zeros do not change the value. The <code>as-hex</code> form gives
+the SCION AS number as three 16-bit groups in network byte order
+(Section 1.5.3.2 of <span>[<a href="#I-D.dekater-scion-controlplane" class="cite xref">I-D.dekater-scion-controlplane</a>]</span>). An IPv4 host
+address can be written in IPv4 form ("192.0.2.1") or in IPv4-mapped
+IPv6 form ("::ffff:192.0.2.1"); both produce the same wire encoding.<a href="#section-3.2-3" class="pilcrow">¶</a></p>
 <p id="section-3.2-4">A presentation-format parser <span class="bcp14">MUST</span> reject a value in which any item does
 not match <code>scion-address</code>, has an ISD number above 65535, or has an
 <code>as-dec</code> value of 2^32 or more. Zone-file implementations <span class="bcp14">SHOULD</span> also
@@ -1444,12 +1450,13 @@ reject a value that contains an unusable address (<a href="#unusable" class="aut
 implementation <span class="bcp14">MUST</span> render each SCION address as follows:<a href="#section-3.2.1-1" class="pilcrow">¶</a></p>
 <ul class="normal">
 <li class="normal" id="section-3.2.1-2.1">
-              <p id="section-3.2.1-2.1.1">the ISD number in decimal without leading zeros;<a href="#section-3.2.1-2.1.1" class="pilcrow">¶</a></p>
+              <p id="section-3.2.1-2.1.1">the ISD number in decimal without leading zeros (Section 1.5.3.1 of
+<span>[<a href="#I-D.dekater-scion-controlplane" class="cite xref">I-D.dekater-scion-controlplane</a>]</span>);<a href="#section-3.2.1-2.1.1" class="pilcrow">¶</a></p>
 </li>
             <li class="normal" id="section-3.2.1-2.2">
-              <p id="section-3.2.1-2.2.1">the AS number in decimal without leading zeros if it is below 2^32,
-and otherwise in the <code>as-hex</code> form with lowercase hexadecimal digits,
-no leading zeros within a group, and "0" for a zero group (Section
+              <p id="section-3.2.1-2.2.1">the SCION AS number in decimal without leading zeros if it is below
+2^32, and otherwise in the <code>as-hex</code> form with lowercase hexadecimal
+digits, no leading zeros within a group, and "0" for a zero group (Section
 1.5.3.2 of <span>[<a href="#I-D.dekater-scion-controlplane" class="cite xref">I-D.dekater-scion-controlplane</a>]</span>);<a href="#section-3.2.1-2.2.1" class="pilcrow">¶</a></p>
 </li>
             <li class="normal" id="section-3.2.1-2.3">
@@ -1816,9 +1823,10 @@ this note.)<a href="#section-7-4" class="pilcrow">¶</a></p>
       </h2>
 <p id="appendix-A-1">The examples use ISD and AS numbers reserved for documentation (ISDs
 1-15 and AS numbers ff00:0:0 to ff00:0:ffff, Sections 1.5.1 and 1.5.2.2
-of <span>[<a href="#I-D.dekater-scion-controlplane" class="cite xref">I-D.dekater-scion-controlplane</a>]</span>), except that test vectors use AS
-64496 from <span>[<a href="#RFC5398" class="cite xref">RFC5398</a>]</span> and values at 2^32 to show the decimal AS form and
-canonical rendering.<a href="#appendix-A-1" class="pilcrow">¶</a></p>
+of <span>[<a href="#I-D.dekater-scion-controlplane" class="cite xref">I-D.dekater-scion-controlplane</a>]</span>). SCION has no documentation AS
+numbers below 2^32, so the test vectors also use AS 64496, a value
+reserved for documentation as a BGP AS number <span>[<a href="#RFC5398" class="cite xref">RFC5398</a>]</span>, and values
+around 2^32 to show the decimal AS form and canonical rendering.<a href="#appendix-A-1" class="pilcrow">¶</a></p>
 <p id="appendix-A-2">An HTTPS service reachable over IPv4, IPv6, and SCION:<a href="#appendix-A-2" class="pilcrow">¶</a></p>
 <div class="lang-dns-rr sourcecode" id="appendix-A-3">
 <pre>
