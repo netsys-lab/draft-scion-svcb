@@ -90,7 +90,7 @@ endpoint is identified by a SCION address, which consists of an
 Isolation Domain (ISD) number, a SCION Autonomous System (AS) number,
 and a host address.
 
-No standard way exists to publish SCION addresses in the DNS. Current
+No interoperable way exists to publish SCION addresses in the DNS. Current
 deployments use TXT records of the form "scion=ISD-AS,host" (Section
 3.3 of {{I-D.meynell-panrg-scion-research-questions}}), which cannot be
 associated with
@@ -111,19 +111,23 @@ ISD number:
 : A 16-bit number identifying a SCION Isolation Domain (Section 1.5.1 of
   {{I-D.dekater-scion-controlplane}}).
 
-AS number:
-: A 48-bit number identifying a SCION Autonomous System (Section 1.5.2
-  of {{I-D.dekater-scion-controlplane}}).
+SCION AS number:
+: A 48-bit number identifying a SCION Autonomous System (AS) (Section
+  1.5.2 of {{I-D.dekater-scion-controlplane}}). SCION AS numbers are
+  distinct from BGP AS numbers, although some SCION ASes reuse their BGP
+  AS number as their SCION AS number. In this document, "AS" and "AS
+  number" always refer to a SCION AS and a SCION AS number.
 
 Host address:
 : The address of an endpoint within its SCION AS, interpreted only
-  within that AS. SCION carries IPv4 (4-octet), IPv6 (16-octet), and
-  other host address types (Section 2.1.2 of
-  {{I-D.dekater-scion-dataplane}}); this document covers IPv4 and IPv6
-  host addresses only.
+  within that AS; the SCION specifications call it the endpoint address.
+  SCION carries IPv4 (4-octet), IPv6 (16-octet), and other host address
+  types (Section 2.1.2 of {{I-D.dekater-scion-dataplane}}); this
+  document covers IPv4 and IPv6 host addresses only.
 
 SCION address:
-: The combination of an ISD number, an AS number, and a host address.
+: The combination of an ISD number, a SCION AS number, and a host
+  address (Section 1.5 of {{I-D.dekater-scion-controlplane}}).
 
 # The "scion" SvcParamKey {#key}
 
@@ -138,7 +142,7 @@ holding one SCION address:
 +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 |          ISD number           |                               |
 +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+                               +
-|                           AS number                           |
+|                        SCION AS number                        |
 +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 |                                                               |
 +                                                               +
@@ -154,7 +158,7 @@ holding one SCION address:
 ISD number:
 : 2 octets, in network byte order.
 
-AS number:
+SCION AS number:
 : 6 octets, in network byte order.
 
 Host address:
@@ -186,12 +190,14 @@ as-hex        = 1*4HEXDIG ":" 1*4HEXDIG ":" 1*4HEXDIG
 host          = IPv4address / IPv6address
 ~~~
 
-The `isd` and `as-dec` values are decimal; leading zeros do not change
-the value. The `as-hex` form gives the AS number as three 16-bit groups
-in network byte order (Section 1.5.3.2 of
-{{I-D.dekater-scion-controlplane}}). An IPv4 host address can be written
-in IPv4 form ("192.0.2.1") or in IPv4-mapped IPv6 form
-("::ffff:192.0.2.1"); both produce the same wire encoding.
+The part before the "_" is the "ISD-AS" text representation of the ISD
+number and SCION AS number (Section 1.5.3 of
+{{I-D.dekater-scion-controlplane}}). The `isd` and `as-dec` values are
+decimal; leading zeros do not change the value. The `as-hex` form gives
+the SCION AS number as three 16-bit groups in network byte order
+(Section 1.5.3.2 of {{I-D.dekater-scion-controlplane}}). An IPv4 host
+address can be written in IPv4 form ("192.0.2.1") or in IPv4-mapped
+IPv6 form ("::ffff:192.0.2.1"); both produce the same wire encoding.
 
 A presentation-format parser MUST reject a value in which any item does
 not match `scion-address`, has an ISD number above 65535, or has an
@@ -206,11 +212,12 @@ SCION tools write a SCION address as "ISD-AS,host". This document uses
 When converting a wire-format value to presentation format, an
 implementation MUST render each SCION address as follows:
 
-* the ISD number in decimal without leading zeros;
+* the ISD number in decimal without leading zeros (Section 1.5.3.1 of
+  {{I-D.dekater-scion-controlplane}});
 
-* the AS number in decimal without leading zeros if it is below 2^32,
-  and otherwise in the `as-hex` form with lowercase hexadecimal digits,
-  no leading zeros within a group, and "0" for a zero group (Section
+* the SCION AS number in decimal without leading zeros if it is below
+  2^32, and otherwise in the `as-hex` form with lowercase hexadecimal
+  digits, no leading zeros within a group, and "0" for a zero group (Section
   1.5.3.2 of {{I-D.dekater-scion-controlplane}});
 
 * an IPv4-mapped host address in dotted-decimal IPv4 form, and any other
@@ -420,9 +427,10 @@ this note.)
 
 The examples use ISD and AS numbers reserved for documentation (ISDs
 1-15 and AS numbers ff00:0:0 to ff00:0:ffff, Sections 1.5.1 and 1.5.2.2
-of {{I-D.dekater-scion-controlplane}}), except that test vectors use AS
-64496 from {{RFC5398}} and values at 2^32 to show the decimal AS form and
-canonical rendering.
+of {{I-D.dekater-scion-controlplane}}). SCION has no documentation AS
+numbers below 2^32, so the test vectors also use AS 64496, a value
+reserved for documentation as a BGP AS number {{RFC5398}}, and values
+around 2^32 to show the decimal AS form and canonical rendering.
 
 An HTTPS service reachable over IPv4, IPv6, and SCION:
 
