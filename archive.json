@@ -1,6 +1,6 @@
 {
   "magic": "E!vIA5L86J2I",
-  "timestamp": "2026-11-12T04:44:06.296714+00:00",
+  "timestamp": "2026-11-15T03:37:21.782989+00:00",
   "repo": "netsys-lab/draft-scion-svcb",
   "labels": [
     {
@@ -56,25 +56,33 @@
       "id": "PR_kwDOTdBIJc8AAAABJLomeg",
       "title": "Update terminology and clarify SCION address formatNic quick review",
       "url": "https://github.com/netsys-lab/draft-scion-svcb/pull/1",
-      "state": "OPEN",
+      "state": "CLOSED",
       "author": "nicorusti",
       "authorAssociation": "NONE",
       "assignees": [],
       "labels": [],
       "body": "Did a quick review. \n\nAdding more points in comments",
       "createdAt": "2026-10-18T17:18:32Z",
-      "updatedAt": "2026-10-18T17:21:45Z",
+      "updatedAt": "2026-11-14T19:44:01Z",
       "baseRepository": "netsys-lab/draft-scion-svcb",
       "baseRefName": "main",
       "baseRefOid": "47a256813b85f8a366fd06eafee30fddc4938eea",
       "headRepository": "nicorusti/draft-scion-svcb",
       "headRefName": "main",
       "headRefOid": "d490206453008155e26da5fe758bd38374776fd6",
-      "closedAt": null,
+      "closedAt": "2026-11-14T19:44:00Z",
       "mergedAt": null,
       "mergedBy": null,
       "mergeCommit": null,
-      "comments": [],
+      "comments": [
+        {
+          "author": "tjohn327",
+          "authorAssociation": "CONTRIBUTOR",
+          "body": "Thanks Nico. This PR targets the old combined draft (draft-scion-svcb.md), which has since been replaced by draft-john-scion-svcb.md, so I\u2019m closing it. The points are carried over:\r\n\r\n\u201cinteroperable way\u201d: adopted.\r\nSCION AS vs BGP AS: adopted. The term is now \u201cSCION AS number\u201d (CP 1.5.2), with a scoping sentence as in CP 1.1. It is used in full where the format is defined, as in CP.\r\nText representation: the ISD-AS part now cites CP 1.5.3 / 1.5.3.1 / 1.5.3.2. The full address uses \u201c_\u201d as separator, so it can\u2019t cite 1.5.3.3 directly.\r\n\u201cMUST ignore\u201d: the current text already names the actor, and it rejects the RRset as RFC 9460 Sec 2.2 requires.\r\n\u201cextends\u201d: the HEv3 material has moved to a separate draft. This draft no longer claims to extend anything.\r\nIANA TODO: done. The section now names the SvcParamKeys registry.",
+          "createdAt": "2026-11-14T19:44:00Z",
+          "updatedAt": "2026-11-14T19:44:00Z"
+        }
+      ],
       "reviews": [
         {
           "id": "PRR_kwDOTdBIJc8AAAABS6RhnA",
