@@ -71,35 +71,17 @@ informative:
 
 --- abstract
 
-This document defines "scion", a Service Parameter Key (SvcParamKey) for
-the Service Binding (SVCB) and HTTPS DNS resource records. Its value
-lists the addresses at which a service endpoint is reachable over SCION
-(Scalability, Control, and Isolation On Next-generation networks), a
-path-aware inter-domain network architecture. This document specifies
-the wire format, presentation format, and semantics of the key and
-requests its registration with IANA.
+This document defines "scion", a Service Parameter Key (SvcParamKey) for the Service Binding (SVCB) and HTTPS DNS resource records. Its value lists the addresses at which a service endpoint is reachable over SCION (Scalability, Control, and Isolation On Next-generation networks), a path-aware inter-domain network architecture. This document specifies the wire format, presentation format, and semantics of the key and requests its registration with IANA.
 
 --- middle
 
 # Introduction
 
-SCION (Scalability, Control, and Isolation On Next-generation networks)
-{{I-D.dekater-scion-controlplane}} {{I-D.dekater-scion-dataplane}} is a
-path-aware inter-domain network architecture {{RFC9217}}. A SCION
-endpoint is identified by a SCION address, which consists of an
-Isolation Domain (ISD) number, a SCION Autonomous System (AS) number,
-and a host address.
+SCION (Scalability, Control, and Isolation On Next-generation networks) {{I-D.dekater-scion-controlplane}} {{I-D.dekater-scion-dataplane}} is a path-aware inter-domain network architecture {{RFC9217}}. A SCION endpoint is identified by a SCION address, which consists of an Isolation Domain (ISD) number, a SCION Autonomous System (AS) number, and a host address.
 
-No interoperable way exists to publish SCION addresses in the DNS. Current
-deployments use TXT records of the form "scion=ISD-AS,host" (Section
-3.3 of {{I-D.meynell-panrg-scion-research-questions}}), which cannot be
-associated with
-the protocols, port, Encrypted ClientHello (ECH) configuration
-{{RFC9848}}, and priority that SVCB and HTTPS records {{RFC9460}} carry
-for an endpoint.
+No interoperable way exists to publish SCION addresses in the DNS. Current deployments use TXT records of the form "scion=ISD-AS,host" (Section 3.3 of {{I-D.meynell-panrg-scion-research-questions}}), which cannot be associated with the protocols, port, Encrypted ClientHello (ECH) configuration {{RFC9848}}, and priority that SVCB and HTTPS records {{RFC9460}} carry for an endpoint.
 
-This document defines the "scion" SvcParamKey, which lists the SCION
-addresses of the alternative endpoint of a ServiceMode record.
+This document defines the "scion" SvcParamKey, which lists the SCION addresses of the alternative endpoint of a ServiceMode record.
 
 # Conventions and Definitions
 
@@ -108,33 +90,22 @@ addresses of the alternative endpoint of a ServiceMode record.
 This document uses the following terms:
 
 ISD number:
-: A 16-bit number identifying a SCION Isolation Domain (Section 1.5.1 of
-  {{I-D.dekater-scion-controlplane}}).
+: A 16-bit number identifying a SCION Isolation Domain (Section 1.5.1 of {{I-D.dekater-scion-controlplane}}).
 
 SCION AS number:
-: A 48-bit number identifying a SCION Autonomous System (AS) (Section
-  1.5.2 of {{I-D.dekater-scion-controlplane}}). SCION AS numbers are
-  distinct from BGP AS numbers, although some SCION ASes reuse their BGP
-  AS number as their SCION AS number. In this document, "AS" and "AS
-  number" always refer to a SCION AS and a SCION AS number.
+: A 48-bit number identifying a SCION Autonomous System (AS) (Section 1.5.2 of {{I-D.dekater-scion-controlplane}}). SCION AS numbers are distinct from BGP AS numbers, although some SCION ASes reuse their BGP AS number as their SCION AS number. In this document, "AS" and "AS number" always refer to a SCION AS and a SCION AS number.
 
 Host address:
-: The address of an endpoint within its SCION AS, interpreted only
-  within that AS; the SCION specifications call it the endpoint address.
-  SCION carries IPv4 (4-octet), IPv6 (16-octet), and other host address
-  types (Section 2.1.2 of {{I-D.dekater-scion-dataplane}}); this
-  document covers IPv4 and IPv6 host addresses only.
+: The address of an endpoint within its SCION AS, interpreted only within that AS; the SCION specifications call it the endpoint address. SCION carries IPv4 (4-octet), IPv6 (16-octet), and other host address types (Section 2.1.2 of {{I-D.dekater-scion-dataplane}}); this document covers IPv4 and IPv6 host addresses only.
 
 SCION address:
-: The combination of an ISD number, a SCION AS number, and a host
-  address (Section 1.5 of {{I-D.dekater-scion-controlplane}}).
+: The combination of an ISD number, a SCION AS number, and a host address (Section 1.5 of {{I-D.dekater-scion-controlplane}}).
 
 # The "scion" SvcParamKey {#key}
 
 ## Wire Format {#wire}
 
-The SvcParamValue is a sequence of one or more 24-octet blocks, each
-holding one SCION address:
+The SvcParamValue is a sequence of one or more 24-octet blocks, each holding one SCION address:
 
 ~~~ ascii-art
  0                   1                   2                   3
@@ -162,24 +133,13 @@ SCION AS number:
 : 6 octets, in network byte order.
 
 Host address:
-: 16 octets. An IPv6 host address is carried as is. An IPv4 host address
-  is carried as an IPv4-mapped IPv6 address (Section 2.5.5.2 of
-  {{RFC4291}}).
+: 16 octets. An IPv6 host address is carried as is. An IPv4 host address is carried as an IPv4-mapped IPv6 address (Section 2.5.5.2 of {{RFC4291}}).
 
-A SvcParamValue whose length is zero or not a multiple of 24 octets
-does not have the expected format, so the RR is malformed and a client
-that implements this key MUST reject the entire RRset (Section 2.2 of
-{{RFC9460}}). A value of any other length is well-formed, even if it
-contains unusable addresses ({{unusable}}).
+A SvcParamValue whose length is zero or not a multiple of 24 octets does not have the expected format, so the RR is malformed and a client that implements this key MUST reject the entire RRset (Section 2.2 of {{RFC9460}}). A value of any other length is well-formed, even if it contains unusable addresses ({{unusable}}).
 
 ## Presentation Format {#presentation}
 
-The presentation value is a comma-separated list (Appendix A.1 of
-{{RFC9460}}) of one or more SCION addresses. To enable simpler parsing,
-this SvcParamValue MUST NOT contain escape sequences. Each item matches
-the `scion-address` rule of the following ABNF {{RFC5234}}. `DIGIT` and
-`HEXDIG` are defined in Appendix B.1 of {{RFC5234}}; `IPv4address` and
-`IPv6address` are defined in Section 3.2.2 of {{RFC3986}}.
+The presentation value is a comma-separated list (Appendix A.1 of {{RFC9460}}) of one or more SCION addresses. To enable simpler parsing, this SvcParamValue MUST NOT contain escape sequences. Each item matches the `scion-address` rule of the following ABNF {{RFC5234}}. `DIGIT` and `HEXDIG` are defined in Appendix B.1 of {{RFC5234}}; `IPv4address` and `IPv6address` are defined in Section 3.2.2 of {{RFC3986}}.
 
 ~~~ abnf
 scion-address = isd "-" as "_" host
@@ -190,136 +150,63 @@ as-hex        = 1*4HEXDIG ":" 1*4HEXDIG ":" 1*4HEXDIG
 host          = IPv4address / IPv6address
 ~~~
 
-The part before the "_" is the "ISD-AS" text representation of the ISD
-number and SCION AS number (Section 1.5.3 of
-{{I-D.dekater-scion-controlplane}}). The `isd` and `as-dec` values are
-decimal; leading zeros do not change the value. The `as-hex` form gives
-the SCION AS number as three 16-bit groups in network byte order
-(Section 1.5.3.2 of {{I-D.dekater-scion-controlplane}}). An IPv4 host
-address can be written in IPv4 form ("192.0.2.1") or in IPv4-mapped
-IPv6 form ("::ffff:192.0.2.1"); both produce the same wire encoding.
+The part before the "_" is the "ISD-AS" text representation of the ISD number and SCION AS number (Section 1.5.3 of {{I-D.dekater-scion-controlplane}}). The `isd` and `as-dec` values are decimal; leading zeros do not change the value. The `as-hex` form gives the SCION AS number as three 16-bit groups in network byte order (Section 1.5.3.2 of {{I-D.dekater-scion-controlplane}}). An IPv4 host address can be written in IPv4 form ("192.0.2.1") or in IPv4-mapped IPv6 form ("::ffff:192.0.2.1"); both produce the same wire encoding.
 
-A presentation-format parser MUST reject a value in which any item does
-not match `scion-address`, has an ISD number above 65535, or has an
-`as-dec` value of 2^32 or more. Zone-file implementations SHOULD also
-reject a value that contains an unusable address ({{unusable}}).
+A presentation-format parser MUST reject a value in which any item does not match `scion-address`, has an ISD number above 65535, or has an `as-dec` value of 2^32 or more. Zone-file implementations SHOULD also reject a value that contains an unusable address ({{unusable}}).
 
-SCION tools write a SCION address as "ISD-AS,host". This document uses
-"_" in place of the "," so that values need no escaping.
+SCION tools write a SCION address as "ISD-AS,host". This document uses "_" in place of the "," so that values need no escaping.
 
 ### Canonical Rendering {#rendering}
 
-When converting a wire-format value to presentation format, an
-implementation MUST render each SCION address as follows:
+When converting a wire-format value to presentation format, an implementation MUST render each SCION address as follows:
 
-* the ISD number in decimal without leading zeros (Section 1.5.3.1 of
-  {{I-D.dekater-scion-controlplane}});
+* the ISD number in decimal without leading zeros (Section 1.5.3.1 of {{I-D.dekater-scion-controlplane}});
 
-* the SCION AS number in decimal without leading zeros if it is below
-  2^32, and otherwise in the `as-hex` form with lowercase hexadecimal
-  digits, no leading zeros within a group, and "0" for a zero group (Section
-  1.5.3.2 of {{I-D.dekater-scion-controlplane}});
+* the SCION AS number in decimal without leading zeros if it is below 2^32, and otherwise in the `as-hex` form with lowercase hexadecimal digits, no leading zeros within a group, and "0" for a zero group (Section 1.5.3.2 of {{I-D.dekater-scion-controlplane}});
 
-* an IPv4-mapped host address in dotted-decimal IPv4 form, and any other
-  host address in the form of Section 4 of {{RFC5952}}, without the
-  mixed notation of Section 5 of {{RFC5952}}.
+* an IPv4-mapped host address in dotted-decimal IPv4 form, and any other host address in the form of Section 4 of {{RFC5952}}, without the mixed notation of Section 5 of {{RFC5952}}.
 
-An unusable address is rendered like any other, so a zone-file
-implementation that follows {{presentation}} rejects the rendered text.
-Zone transfers carry wire format and are not affected.
-A round trip through wire format preserves the value but not necessarily
-the text ({{rendering-vectors}}). Two SCION addresses are the same
-address if their wire encodings are equal.
+An unusable address is rendered like any other, so a zone-file implementation that follows {{presentation}} rejects the rendered text. Zone transfers carry wire format and are not affected. A round trip through wire format preserves the value but not necessarily the text ({{rendering-vectors}}). Two SCION addresses are the same address if their wire encodings are equal.
 
 ## Semantics {#semantics}
 
-The "scion" SvcParamKey applies to HTTPS records and to SVCB records of
-any protocol mapping, unless that mapping specifies otherwise (Section 7
-of {{RFC9460}}).
+The "scion" SvcParamKey applies to HTTPS records and to SVCB records of any protocol mapping, unless that mapping specifies otherwise (Section 7 of {{RFC9460}}).
 
-The key indicates that the alternative endpoint named by the record's
-TargetName is reachable over SCION at each listed address. The listed
-addresses are equivalent; their order carries no preference, and
-duplicates have no effect. Clients SHOULD pick addresses to use in a
-random order, as for "ipv4hint" and "ipv6hint".
+The key indicates that the alternative endpoint named by the record's TargetName is reachable over SCION at each listed address. The listed addresses are equivalent; their order carries no preference, and duplicates have no effect. Clients SHOULD pick addresses to use in a random order, as for "ipv4hint" and "ipv6hint".
 
-Unlike "ipv4hint" and "ipv6hint", the value is not a hint: clients use
-the listed addresses directly. This document does not specify how
-clients order connection attempts to SCION addresses relative to IP
-addresses.
+Unlike "ipv4hint" and "ipv6hint", the value is not a hint: clients use the listed addresses directly. This document does not specify how clients order connection attempts to SCION addresses relative to IP addresses.
 
-The other SvcParams of the record apply to connections to the listed
-SCION addresses as they apply to IP connections to the endpoint. In
-particular:
+The other SvcParams of the record apply to connections to the listed SCION addresses as they apply to IP connections to the endpoint. In particular:
 
-* "port" gives the transport port at the SCION host address. If it is
-  absent, the port is determined as for IP (Section 7.2 of {{RFC9460}}).
+* "port" gives the transport port at the SCION host address. If it is absent, the port is determined as for IP (Section 7.2 of {{RFC9460}}).
 
-* "alpn" and "no-default-alpn" determine the SVCB ALPN set for
-  connections to the SCION addresses exactly as for IP connections
-  (Section 7.1 of {{RFC9460}}). A protocol that runs over TCP uses
-  TCP/SCION, and one that runs over UDP uses UDP/SCION (SCION protocol
-  numbers 6 and 17, Appendix A of {{I-D.dekater-scion-dataplane}}). A
-  client that cannot use the required transport over SCION does not use
-  the SCION addresses for that protocol.
+* "alpn" and "no-default-alpn" determine the SVCB ALPN set for connections to the SCION addresses exactly as for IP connections (Section 7.1 of {{RFC9460}}). A protocol that runs over TCP uses TCP/SCION, and one that runs over UDP uses UDP/SCION (SCION protocol numbers 6 and 17, Appendix A of {{I-D.dekater-scion-dataplane}}). A client that cannot use the required transport over SCION does not use the SCION addresses for that protocol.
 
 * "ech" applies to TLS handshakes over SCION.
 
-A client MUST authenticate the server of a connection to a SCION
-address as it would over IP, with the same server name and certificate
-validation.
+A client MUST authenticate the server of a connection to a SCION address as it would over IP, with the same server name and certificate validation.
 
-An IPv4-mapped host address denotes a SCION IPv4 host address, which a
-client MUST use as a 4-octet host address in the SCION header (address
-type 0, length 0; Section 2.1.2 of {{I-D.dekater-scion-dataplane}}).
-Any other value denotes a 16-octet IPv6 host address (address type 0,
-length 3). The encoding therefore cannot express IPv6 host addresses
-that are themselves IPv4-mapped.
+An IPv4-mapped host address denotes a SCION IPv4 host address, which a client MUST use as a 4-octet host address in the SCION header (address type 0, length 0; Section 2.1.2 of {{I-D.dekater-scion-dataplane}}). Any other value denotes a 16-octet IPv6 host address (address type 0, length 3). The encoding therefore cannot express IPv6 host addresses that are themselves IPv4-mapped.
 
-A client MUST NOT use the host address of a SCION address as an IP
-address of the endpoint. IP addresses come from A and AAAA records or
-from "ipv4hint" and "ipv6hint".
+A client MUST NOT use the host address of a SCION address as an IP address of the endpoint. IP addresses come from A and AAAA records or from "ipv4hint" and "ipv6hint".
 
 ### Unusable Addresses {#unusable}
 
-A SCION address is unusable if its ISD number is 0 or its AS number is
-0 (wildcards, Sections 1.5.1 and 1.5.2.1 of
-{{I-D.dekater-scion-controlplane}}), if its AS number is ffff:ffff:ffff
-(reserved, Section 1.5.2.2 of {{I-D.dekater-scion-controlplane}}), or
-if its host address is unspecified (0.0.0.0 or ::) or multicast
-(224.0.0.0/4, or ff00::/8 per Section 2.7 of {{RFC4291}}).
+A SCION address is unusable if its ISD number is 0 or its AS number is 0 (wildcards, Sections 1.5.1 and 1.5.2.1 of {{I-D.dekater-scion-controlplane}}), if its AS number is ffff:ffff:ffff (reserved, Section 1.5.2.2 of {{I-D.dekater-scion-controlplane}}), or if its host address is unspecified (0.0.0.0 or ::) or multicast (224.0.0.0/4, or ff00::/8 per Section 2.7 of {{RFC4291}}).
 
-Operators MUST NOT publish unusable addresses. A client MUST ignore
-unusable addresses and MAY use the others in the value. If no address
-remains, the client MUST proceed as if the key were absent; if the key
-is mandatory, the record is incompatible ({{mandatory}}).
+Operators MUST NOT publish unusable addresses. A client MUST ignore unusable addresses and MAY use the others in the value. If no address remains, the client MUST proceed as if the key were absent; if the key is mandatory, the record is incompatible ({{mandatory}}).
 
-ISD numbers 16-63 and AS numbers ffaa:0:0 to ffaa:ff:ffff are reserved
-for private use (Sections 1.5.1 and 1.5.2.2 of
-{{I-D.dekater-scion-controlplane}}). Operators SHOULD NOT publish
-addresses from these ranges in zones intended for use on the Internet.
+ISD numbers 16-63 and AS numbers ffaa:0:0 to ffaa:ff:ffff are reserved for private use (Sections 1.5.1 and 1.5.2.2 of {{I-D.dekater-scion-controlplane}}). Operators SHOULD NOT publish addresses from these ranges in zones intended for use on the Internet.
 
 ### The "mandatory" Key {#mandatory}
 
-When "scion" is listed in "mandatory", the record is compatible (Section
-8 of {{RFC9460}}) for a client only if it implements the key, at least
-one listed address is usable ({{unusable}}), and the client has SCION
-connectivity; otherwise the client ignores the record. A path lookup or
-connection attempt that fails later does not make the record
-incompatible.
-{{scion-only}} gives guidance for operators.
+When "scion" is listed in "mandatory", the record is compatible (Section 8 of {{RFC9460}}) for a client only if it implements the key, at least one listed address is usable ({{unusable}}), and the client has SCION connectivity; otherwise the client ignores the record. A path lookup or connection attempt that fails later does not make the record incompatible. {{scion-only}} gives guidance for operators.
 
 # Operational Considerations {#ops}
 
 ## Endpoints Reachable Only over SCION {#scion-only}
 
-For an endpoint reachable only over SCION, operators SHOULD list
-"scion" in "mandatory" and publish no A or AAAA records for its
-TargetName. For an endpoint also reachable over IP, operators SHOULD NOT
-list "scion" in "mandatory", because clients that do not implement the
-key would discard the record. In the following example, clients that
-can use SCION use the first record and other clients the second, over
-IP:
+For an endpoint reachable only over SCION, operators SHOULD list "scion" in "mandatory" and publish no A or AAAA records for its TargetName. For an endpoint also reachable over IP, operators SHOULD NOT list "scion" in "mandatory", because clients that do not implement the key would discard the record. In the following example, clients that can use SCION use the first record and other clients the second, over IP:
 
 ~~~ dns-rr
 example.com.  3600 IN HTTPS 1 sc.example.com. (
@@ -332,72 +219,37 @@ example.com.  3600 IN AAAA  2001:db8::1
 
 ## Codepoint Used Before Assignment
 
-Prototype implementations used the Private Use value 65280 for this key.
-Clients SHOULD NOT interpret 65280 as "scion" unless configured to do so.
+Prototype implementations used the Private Use value 65280 for this key. Clients SHOULD NOT interpret 65280 as "scion" unless configured to do so.
 
 # Security Considerations {#security}
 
-The security considerations of {{RFC9460}} apply. The security of the
-SCION control and data planes is specified in
-{{I-D.dekater-scion-controlplane}} and {{I-D.dekater-scion-dataplane}}.
+The security considerations of {{RFC9460}} apply. The security of the SCION control and data planes is specified in {{I-D.dekater-scion-controlplane}} and {{I-D.dekater-scion-dataplane}}.
 
 ## Endpoint Authentication
 
-An attacker that can modify DNS answers can already redirect clients by
-changing A, AAAA, or SVCB data, and clients rely on endpoint
-authentication to detect such redirection (Section 12 of {{RFC9460}}).
-A forged "scion" value also lets the attacker choose the destination
-ISD and AS, and with them the paths available to the client. SCION path
-authorization validates the path, not that the host serves the
-requested name; it does not replace endpoint authentication
-({{semantics}}).
+An attacker that can modify DNS answers can already redirect clients by changing A, AAAA, or SVCB data, and clients rely on endpoint authentication to detect such redirection (Section 12 of {{RFC9460}}). A forged "scion" value also lets the attacker choose the destination ISD and AS, and with them the paths available to the client. SCION path authorization validates the path, not that the host serves the requested name; it does not replace endpoint authentication ({{semantics}}).
 
-Because clients use the value directly rather than as a hint, no A or
-AAAA lookup can confirm it. The DNSSEC validation policy of Section 3.1
-of {{RFC9460}} applies to it as to the rest of the record {{RFC9364}}.
+Because clients use the value directly rather than as a hint, no A or AAAA lookup can confirm it. The DNSSEC validation policy of Section 3.1 of {{RFC9460}} applies to it as to the rest of the record {{RFC9364}}.
 
 ## Internal Targets
 
-A "scion" value can name any AS, including the client's own, and any
-host within it. This is the SCION form of the attack on local-network
-addresses described in Section 12 of {{RFC9460}}. Host addresses are
-interpreted only within their AS and are often private-use IP
-addresses, so a client cannot identify internal targets by host address
-alone. Clients that restrict connections to local-network IP addresses
-SHOULD apply the same policy to SCION addresses in their own AS and in
-private-use ISDs and ASes.
+A "scion" value can name any AS, including the client's own, and any host within it. This is the SCION form of the attack on local-network addresses described in Section 12 of {{RFC9460}}. Host addresses are interpreted only within their AS and are often private-use IP addresses, so a client cannot identify internal targets by host address alone. Clients that restrict connections to local-network IP addresses SHOULD apply the same policy to SCION addresses in their own AS and in private-use ISDs and ASes.
 
 ## Removal of the Key
 
-An attacker that removes the "scion" key or the record causes clients
-to connect over IP instead. DNSSEC detects modification of a signed
-record; blocking of the response is addressed by Section 3.1 of
-{{RFC9460}}. Whether a client treats missing SCION addresses as a
-failure is a local policy matter.
+An attacker that removes the "scion" key or the record causes clients to connect over IP instead. DNSSEC detects modification of a signed record; blocking of the response is addressed by Section 3.1 of {{RFC9460}}. Whether a client treats missing SCION addresses as a failure is a local policy matter.
 
 ## Resource Consumption
 
-Each distinct destination ISD and AS a client uses can trigger path
-lookups, which load the client's control service and, for uncached
-paths, those of core ASes in the client's ISD and in the destination
-ISD. Clients SHOULD limit the number of distinct destination ASes for
-which they look up paths when connecting to a service.
+Each distinct destination ISD and AS a client uses can trigger path lookups, which load the client's control service and, for uncached paths, those of core ASes in the client's ISD and in the destination ISD. Clients SHOULD limit the number of distinct destination ASes for which they look up paths when connecting to a service.
 
 # Privacy Considerations
 
-A path lookup reveals the destination ISD and AS to the client's SCION
-control service. Unless the answer is cached, that service may query
-core ASes in its own ISD, which learn the querying AS and the
-destination ISD, and core ASes in the destination ISD, which learn the
-destination AS and the querying AS (Section 4.1 of
-{{I-D.dekater-scion-controlplane}}). These parties can differ from the
-client's IP access provider.
+A path lookup reveals the destination ISD and AS to the client's SCION control service. Unless the answer is cached, that service may query core ASes in its own ISD, which learn the querying AS and the destination ISD, and core ASes in the destination ISD, which learn the destination AS and the querying AS (Section 4.1 of {{I-D.dekater-scion-controlplane}}). These parties can differ from the client's IP access provider.
 
 # IANA Considerations {#iana}
 
-IANA is requested to add the following entry to the "DNS SVCB Service
-Parameter Keys (SvcParamKeys)" registry in the "DNS Service Bindings
-(SVCB)" registry group {{RFC9460}}:
+IANA is requested to add the following entry to the "DNS SVCB Service Parameter Keys (SvcParamKeys)" registry in the "DNS Service Bindings (SVCB)" registry group {{RFC9460}}:
 
 Number:
 : TBD (13 suggested)
@@ -414,23 +266,15 @@ Change Controller:
 Reference:
 : This document ({{key}})
 
-{{presentation}} and {{wire}} specify the presentation-to-wire
-conversion required by Section 14.3.1 of {{RFC9460}};
-{{test-vectors}} provides test vectors.
+{{presentation}} and {{wire}} specify the presentation-to-wire conversion required by Section 14.3.1 of {{RFC9460}}; {{test-vectors}} provides test vectors.
 
-(RFC Editor: replace TBD with the assigned value throughout and remove
-this note.)
+(RFC Editor: replace TBD with the assigned value throughout and remove this note.)
 
 --- back
 
 # Examples {#examples}
 
-The examples use ISD and AS numbers reserved for documentation (ISDs
-1-15 and AS numbers ff00:0:0 to ff00:0:ffff, Sections 1.5.1 and 1.5.2.2
-of {{I-D.dekater-scion-controlplane}}). SCION has no documentation AS
-numbers below 2^32, so the test vectors also use AS 64496, a value
-reserved for documentation as a BGP AS number {{RFC5398}}, and values
-around 2^32 to show the decimal AS form and canonical rendering.
+The examples use ISD and AS numbers reserved for documentation (ISDs 1-15 and AS numbers ff00:0:0 to ff00:0:ffff, Sections 1.5.1 and 1.5.2.2 of {{I-D.dekater-scion-controlplane}}). SCION has no documentation AS numbers below 2^32, so the test vectors also use AS 64496, a value reserved for documentation as a BGP AS number {{RFC5398}}, and values around 2^32 to show the decimal AS form and canonical rendering.
 
 An HTTPS service reachable over IPv4, IPv6, and SCION:
 
@@ -445,9 +289,7 @@ web  3600 IN HTTPS  1 . alpn=h3,h2 scion=1-ff00:0:110_192.0.2.81
 
 ## Wire Format {#wire-vectors}
 
-Each vector gives a presentation value and the SvcParamValue in
-hexadecimal, one 24-octet block per line, split into ISD, AS, and host.
-Whitespace is for readability only.
+Each vector gives a presentation value and the SvcParamValue in hexadecimal, one 24-octet block per line, split into ISD, AS, and host. Whitespace is for readability only.
 
 ~~~
 1. 1-ff00:0:110_192.0.2.1
@@ -466,8 +308,7 @@ Whitespace is for readability only.
 
 ## Canonical Rendering {#rendering-vectors}
 
-Each line gives a presentation value and the canonical rendering of its
-wire value ({{rendering}}).
+Each line gives a presentation value and the canonical rendering of its wire value ({{rendering}}).
 
 ~~~
 1-FF00:0000:0110_2001:DB8:0:0::1  ->  1-ff00:0:110_2001:db8::1
@@ -479,8 +320,7 @@ wire value ({{rendering}}).
 
 ## Invalid and Unusable Values {#invalid-vectors}
 
-Zone-file implementations SHOULD reject a value with an unusable
-address; clients ignore the address ({{presentation}}, {{unusable}}).
+Zone-file implementations SHOULD reject a value with an unusable address; clients ignore the address ({{presentation}}, {{unusable}}).
 
 ~~~
 Presentation: 1-ff00:0:110,192.0.2.1
@@ -520,33 +360,21 @@ Result:       malformed: the RRset is rejected
 # Design Rationale
 
 SvcParamKey rather than a new RR type:
-: A new RR type would need an additional query and support in DNS
-  software before deployment. A SvcParamKey needs only registration and
-  is ignored by software that does not implement it.
+: A new RR type would need an additional query and support in DNS software before deployment. A SvcParamKey needs only registration and is ignored by software that does not implement it.
 
 Fixed-length binary encoding:
-: Carrying every host address in 16 octets costs 12 octets per IPv4
-  host address, in exchange for exactly one encoding per address and
-  comparison octet by octet, as with "ipv4hint" and "ipv6hint".
+: Carrying every host address in 16 octets costs 12 octets per IPv4 host address, in exchange for exactly one encoding per address and comparison octet by octet, as with "ipv4hint" and "ipv6hint".
 
 # Implementation Status {#implementation-status}
 
-(RFC Editor: please remove this section, and the references cited only
-in it, before publication.)
+(RFC Editor: please remove this section, and the references cited only in it, before publication.)
 
 Implementation status as of November 2026 ({{RFC7942}}):
 
 dns-scion-svcb {{DNS-SCION-SVCB}}:
-: A fork of the miekg/dns Go library that parses, serializes, and
-  presents the key using the Private Use value 65280, deployed in a
-  CoreDNS instance on a SCION testbed. It differs from this document in
-  that it fails the whole DNS message on a malformed value. License:
-  BSD-3-Clause. Contact: Tony John.
+: A fork of the miekg/dns Go library that parses, serializes, and presents the key using the Private Use value 65280, deployed in a CoreDNS instance on a SCION testbed. It differs from this document in that it fails the whole DNS message on a malformed value. License: BSD-3-Clause. Contact: Tony John.
 
 # Acknowledgments
 {:numbered="false"}
 
-The idea of a SCION SvcParamKey was first raised in
-{{I-D.meynell-panrg-scion-research-questions}}. The authors thank the
-participants of the SCION research meetings and of the SCION Association
-Technical Committee for their feedback.
+The idea of a SCION SvcParamKey was first raised in {{I-D.meynell-panrg-scion-research-questions}}. The authors thank the participants of the SCION research meetings and of the SCION Association Technical Committee for their feedback.
